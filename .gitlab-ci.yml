@@ -1,0 +1,44 @@
+image: python:latest
+
+before_script:
+  - python3 --version ; pip3 --version  # For debugging
+  - pip3 install -r requirements.txt
+
+stages:          # List of stages for jobs, and their order of execution
+#  - build
+  - test
+#  - deploy
+
+#build-job:       # This job runs in the build stage, which runs first.
+#  stage: build
+#  script:
+#    - echo "Compiling the code..."
+#    - echo "Compile complete."
+
+unit-test:   # This job runs in the test stage.
+  stage: test    # It only starts when the job in the build stage completes successfully.
+  script:
+    - python3 -m unittest
+
+lint-job:
+  stage: test
+  script:
+    - pylint src
+    - pylint test
+
+
+#deploy-job:      # This job runs in the deploy stage.
+#  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+#  environment: production
+#  script:
+#    - echo "Deploying application..."
+#    - echo "Application successfully deployed."
+
+
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml
+
+# Official language image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/python/tags/
