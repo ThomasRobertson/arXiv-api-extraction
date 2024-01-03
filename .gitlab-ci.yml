@@ -18,7 +18,7 @@ stages:          # List of stages for jobs, and their order of execution
 unit-test:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
   script:
-    - python3 -m unittest
+    - pytest
 
 lint-job:
   stage: test
