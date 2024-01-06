@@ -32,3 +32,18 @@ def test_header_contain_setspec(setup_data: connect_to_arxiv.BulkResponse):
     harvester = setup_data
     header = harvester.GetRecordHeader()
     assert isinstance(header["setSpec"], str)
+
+
+def test_next_record_different(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    header1 = harvester.GetRecordHeader()
+    harvester.NextRecord()
+    header2 = harvester.GetRecordHeader()
+    assert header1 != header2
+
+
+def test_record_same(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    header1 = harvester.GetRecordHeader()
+    header2 = harvester.GetRecordHeader()
+    assert header1 == header2
