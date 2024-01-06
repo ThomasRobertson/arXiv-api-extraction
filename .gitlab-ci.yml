@@ -17,6 +17,8 @@ stages:          # List of stages for jobs, and their order of execution
 
 unit-test:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
+  tags:
+    - docker
   script:
     - pytest --cov=src --cov-report xml
   coverage: /(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/
@@ -28,6 +30,8 @@ unit-test:   # This job runs in the test stage.
 
 lint-job:
   stage: test
+  tags:
+    - docker
   script:
     - pylint src
     - pylint test
