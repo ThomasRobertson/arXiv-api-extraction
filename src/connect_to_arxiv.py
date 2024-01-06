@@ -15,26 +15,26 @@ class BulkResponse:
                 "until": {until_date},
             }
         )
-        self.records = self.records.next()
         self.namespaces = {
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "oai_dc": "http://www.openarchives.org/OAI/2.0/oai_dc/",
             "oai": "http://www.openarchives.org/OAI/2.0/",
             "dc": "http://purl.org/dc/elements/1.1/",
         }
+        self.record = self.records.next()
 
-    def GetNextRecord(self) -> None:
-        self.records = self.records.next()
+    def NextRecord(self) -> None:
+        self.record = self.records.next()
 
     def GetRecordHeader(self) -> dict[str, str]:
         header = {}
-        header["identifier"] = self.records.xml.find(  # type: ignore
+        header["identifier"] = self.record.xml.find(
             "./oai:header/oai:identifier", self.namespaces
         ).text
-        header["datestamp"] = self.records.xml.find(  # type: ignore
+        header["datestamp"] = self.record.xml.find(
             "./oai:header/oai:datestamp", self.namespaces
         ).text
-        header["setSpec"] = self.records.xml.find(  # type: ignore
+        header["setSpec"] = self.record.xml.find(
             "./oai:header/oai:setSpec", self.namespaces
         ).text
         return header
