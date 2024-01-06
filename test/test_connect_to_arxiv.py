@@ -13,7 +13,7 @@ def setup_data() -> connect_to_arxiv.BulkResponse:
 def test_header_not_empty(setup_data: connect_to_arxiv.BulkResponse):
     harvester = setup_data
     header = harvester.GetRecordHeader()
-    assert header
+    assert bool(header) is True
 
 
 def test_header_contain_identifier(setup_data: connect_to_arxiv.BulkResponse):
@@ -32,6 +32,61 @@ def test_header_contain_setspec(setup_data: connect_to_arxiv.BulkResponse):
     harvester = setup_data
     header = harvester.GetRecordHeader()
     assert isinstance(header["setSpec"], str)
+
+
+def test_metadata_not_empty(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    metadata = harvester.GetRecordMetadata()
+    assert bool(metadata) is True
+
+
+def test_metadata_contain_title(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    metadata = harvester.GetRecordMetadata()
+    assert isinstance(metadata["dc:title"], list)
+    assert bool(metadata["dc:title"]) is True
+
+
+def test_metadata_contain_creator(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    metadata = harvester.GetRecordMetadata()
+    assert isinstance(metadata["dc:creator"], list)
+    assert bool(metadata["dc:creator"]) is True
+
+
+def test_metadata_contain_subject(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    metadata = harvester.GetRecordMetadata()
+    assert isinstance(metadata["dc:subject"], list)
+    assert bool(metadata["dc:subject"]) is True
+
+
+def test_metadata_contain_description(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    metadata = harvester.GetRecordMetadata()
+    assert isinstance(metadata["dc:description"], list)
+    assert bool(metadata["dc:description"]) is True
+
+
+def test_metadata_contain_date(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    metadata = harvester.GetRecordMetadata()
+    assert isinstance(metadata["dc:date"], list)
+    assert bool(metadata["dc:date"]) is True
+
+
+def test_metadata_contain_identifier(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    metadata = harvester.GetRecordMetadata()
+    assert isinstance(metadata["dc:identifier"], list)
+    assert bool(metadata["dc:identifier"]) is True
+
+
+def test_metadata_contain_type(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    metadata = harvester.GetRecordMetadata()
+    assert isinstance(metadata["dc:type"], list)
+    assert bool(metadata["dc:type"]) is True
 
 
 def test_next_record_different(setup_data: connect_to_arxiv.BulkResponse):
