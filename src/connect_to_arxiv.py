@@ -25,3 +25,18 @@ class BulkResponse:
 
     def GetNextRecord(self) -> None:
         self.records = self.records.next()
+
+    def GetRecordHeader(self) -> dict[str, str]:
+        header = {}
+        header["identifier"] = self.records.xml.find(  # type: ignore
+            "./oai:header/oai:identifier", self.namespaces
+        ).text
+        header["datestamp"] = self.records.xml.find(  # type: ignore
+            "./oai:header/oai:datestamp", self.namespaces
+        ).text
+        header["setSpec"] = self.records.xml.find(  # type: ignore
+            "./oai:header/oai:setSpec", self.namespaces
+        ).text
+        return header
+
+    # def __GetListFromXlmElement(self):
