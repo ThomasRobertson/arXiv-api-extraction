@@ -3,20 +3,32 @@
 import pytest
 from src import connect_to_arxiv
 
-NUMBER_ENTRIES_REQUESTED = 10
+
+@pytest.fixture(scope="module")
+def setup_data() -> connect_to_arxiv.BulkResponse:
+    harvester = connect_to_arxiv.BulkResponse()
+    return harvester
 
 
-@pytest.fixture
-def setup_data():
-    result = connect_to_arxiv.GetResponseFromAPI(1, NUMBER_ENTRIES_REQUESTED)
-    yield result
+def test_header_not_empty(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    header = harvester.GetRecordHeader()
+    assert header
 
 
-def test_not_empty(setup_data):
-    assert setup_data
+def test_header_contain_identifier(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    header = harvester.GetRecordHeader()
+    assert isinstance(header["identifier"], str)
 
 
-def test_number_of_entries(setup_data):
-    result = setup_data
-    number_of_headlines = len(result["entries"])
-    assert number_of_headlines == NUMBER_ENTRIES_REQUESTED
+def test_header_contain_datestamp(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    header = harvester.GetRecordHeader()
+    assert isinstance(header["datestamp"], str)
+
+
+def test_header_contain_setspec(setup_data: connect_to_arxiv.BulkResponse):
+    harvester = setup_data
+    header = harvester.GetRecordHeader()
+    assert isinstance(header["setSpec"], str)
