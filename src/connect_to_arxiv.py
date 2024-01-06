@@ -59,3 +59,25 @@ class BulkResponse:
             "./oai:header/oai:setSpec", self.namespaces
         ).text
         return header
+
+    def GetRecordMetadata(self) -> dict[str, str]:
+        metadata = {}
+        block_names = [
+            "dc:title",
+            "dc:creator",
+            "dc:subject",
+            "dc:description",
+            "dc:date",
+            "dc:type",
+            "dc:identifier",
+        ]
+        for block_name in block_names:
+            metadata[block_name] = self.__GetListFromXMLElement(block_name)
+        return metadata
+
+    def __GetListFromXMLElement(self, xml_block: str) -> list[str]:
+        block = self.record.xml.findall(
+            f"./oai:metadata/oai_dc:dc/{xml_block}", self.namespaces
+        )
+        block_list = [item.text for item in block]
+        return block_list
