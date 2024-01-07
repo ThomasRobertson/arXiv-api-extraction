@@ -20,13 +20,13 @@ unit-test:   # This job runs in the test stage.
   tags:
     - docker
   script:
-    - pytest --cov=src --cov-report xml
+    - pytest --cov=src
   coverage: /(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
+  # artifacts:
+  #   reports:
+  #     coverage_report:
+  #       coverage_format: cobertura
+  #       path: coverage.xml
 
 lint-job:
   stage: test
