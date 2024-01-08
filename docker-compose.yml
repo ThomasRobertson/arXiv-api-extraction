@@ -1,0 +1,18 @@
+version: '3'
+services:
+  neo4j:
+    image: neo4j:5.15.0-community-bullseye
+    hostname: neo4j
+    container_name: neo4j
+    volumes:
+      #- ./neo4j.conf:/conf/neo4j.conf # This is the main configuration file.
+      - ./neo4j/data/server1:/data
+      - ./neo4j/logs/server1:/logs
+      - ./neo4j/conf/server1:/conf
+      - ./neo4j/import/server1:/import
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: yes
+      NEO4J_AUTH: none
