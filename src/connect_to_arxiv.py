@@ -49,15 +49,13 @@ class BulkResponse:
 
     def GetRecordHeader(self) -> dict[str, str]:
         header = {}
-        header["identifier"] = self.record.xml.find(
-            "./oai:header/oai:identifier", self.namespaces
-        ).text
-        header["datestamp"] = self.record.xml.find(
-            "./oai:header/oai:datestamp", self.namespaces
-        ).text
-        header["setSpec"] = self.record.xml.find(
-            "./oai:header/oai:setSpec", self.namespaces
-        ).text
+        block_names = [
+            "identifier",
+            "datestamp",
+            "setSpec"
+        ]
+        for block_name in block_names:
+            header[block_name] = self.record.xml.find(f"./oai:header/oai:{block_name}", self.namespaces).text
         return header
 
     def GetRecordMetadata(self) -> dict[str, str]:
