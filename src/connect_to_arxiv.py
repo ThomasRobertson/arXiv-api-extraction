@@ -17,8 +17,8 @@ class BulkResponse:
             False,
             **{
                 "metadataPrefix": "oai_dc",
-                "from": {from_date},
-                "until": {until_date},
+                "from": from_date,
+                "until": until_date,
             },
         )
         self.namespaces = {
@@ -27,10 +27,10 @@ class BulkResponse:
             "oai": "http://www.openarchives.org/OAI/2.0/",
             "dc": "http://purl.org/dc/elements/1.1/",
         }
-        self.NextRecord()
+        self.next_record()
 
-    def NextRecord(self) -> None:
-        """Because Sickle is well implemented, the "retry_after" an HTTP error doesn't work.
+    def next_record(self) -> None:
+        """Because Sickle is so well implemented, the "retry_after" an HTTP error doesn't work.
         Here we are following arXiv API manual and waiting 5 seconds after a failed try.
 
         Raises:
@@ -47,20 +47,20 @@ class BulkResponse:
             else:
                 break
 
-    def GetRecordHeader(self) -> dict[str, str]:
+    def get_record_header(self) -> dict[str, str]:
         header = {}
-        block_names = [
+        header_fields = [
             "identifier",
             "datestamp",
             "setSpec"
         ]
-        for block_name in block_names:
-            header[block_name] = self.record.xml.find(f"./oai:header/oai:{block_name}", self.namespaces).text
+        for field in header_fields:
+            header[field] = self.record.xml.find(f"./oai:header/oai:{field}", self.namespaces).text
         return header
 
-    def GetRecordMetadata(self) -> dict[str, str]:
+    def get_record_metadata(self) -> dict[str, list[str]]:
         metadata = {}
-        block_names = [
+        metadata_fields = [
             "dc:title",
             "dc:creator",
             "dc:subject",
@@ -69,11 +69,11 @@ class BulkResponse:
             "dc:type",
             "dc:identifier",
         ]
-        for block_name in block_names:
-            metadata[block_name] = self.__GetListFromXMLElement(block_name)
+        for field in metadata_fields:
+            metadata[field] = self._get_list_from_xml_element(field)
         return metadata
 
-    def __GetListFromXMLElement(self, xml_block: str) -> list[str]:
+    def _get_list_from_xml_element(self, xml_block: str) -> list[str]:
         block = self.record.xml.findall(
             f"./oai:metadata/oai_dc:dc/{xml_block}", self.namespaces
         )
