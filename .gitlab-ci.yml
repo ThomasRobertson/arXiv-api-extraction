@@ -3,6 +3,7 @@ image: python:latest
 before_script:
   - python3 --version ; pip3 --version  # For debugging
   - pip3 install -r requirements.txt
+  - docker compose up -d
 
 stages:          # List of stages for jobs, and their order of execution
 #  - build

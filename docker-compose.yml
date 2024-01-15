@@ -6,10 +6,10 @@ services:
     container_name: neo4j
     volumes:
       #- ./neo4j.conf:/conf/neo4j.conf # This is the main configuration file.
-      - ./neo4j/data/server1:/data
-      - ./neo4j/logs/server1:/logs
-      - ./neo4j/conf/server1:/conf
-      - ./neo4j/import/server1:/import
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/conf:/conf
+      - ./neo4j/import:/import
     ports:
       - "7474:7474"
       - "7687:7687"

@@ -1,6 +1,7 @@
 .vscode
 .devcontainer
 .DS_Store
+neo4j
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
