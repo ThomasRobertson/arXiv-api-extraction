@@ -4,7 +4,7 @@ from requests import HTTPError
 from sickle import Sickle
 
 
-class BulkResponse:
+class ArXivHarvester:
     """Access in bulk meta-data from arXiv using OAI-PHM."""
 
     def __init__(self, from_date: str = "2012-12-12", until_date: str = "2012-12-19"):
@@ -49,13 +49,11 @@ class BulkResponse:
 
     def get_record_header(self) -> dict[str, str]:
         header = {}
-        header_fields = [
-            "identifier",
-            "datestamp",
-            "setSpec"
-        ]
+        header_fields = ["identifier", "datestamp", "setSpec"]
         for field in header_fields:
-            header[field] = self.record.xml.find(f"./oai:header/oai:{field}", self.namespaces).text
+            header[field] = self.record.xml.find(
+                f"./oai:header/oai:{field}", self.namespaces
+            ).text
         return header
 
     def get_record_metadata(self) -> dict[str, list[str]]:
