@@ -36,8 +36,7 @@ lint-job:
   - python3 --version ; pip3 --version
   - pip3 install -r requirements.txt
   script:
-    - pylint src
-    - pylint test
+    - pylint src test
 
 
 #deploy-job:      # This job runs in the deploy stage.
