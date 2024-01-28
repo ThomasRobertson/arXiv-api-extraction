@@ -1,10 +1,3 @@
-image: python:latest
-
-before_script:
-  - python3 --version ; pip3 --version  # For debugging
-  - pip3 install -r requirements.txt
-  - docker compose up -d
-
 stages:          # List of stages for jobs, and their order of execution
 #  - build
   - test
@@ -16,12 +9,17 @@ stages:          # List of stages for jobs, and their order of execution
 #    - echo "Compiling the code..."
 #    - echo "Compile complete."
 
-unit-test:   # This job runs in the test stage.
-  stage: test    # It only starts when the job in the build stage completes successfully.
-  tags:
-    - docker
+unit-test:
+  image: docker:cli
+  stage: test
+  before_script:
+    - uname -a
+    - chmod +x run_unit_test.sh
+    - chmod +x ci-cd/python-init.sh
+    - ls
+    - pwd
   script:
-    - pytest --cov=src
+    - ./run_unit_test.sh
   coverage: /(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/
   # artifacts:
   #   reports:
@@ -30,9 +28,13 @@ unit-test:   # This job runs in the test stage.
   #       path: coverage.xml
 
 lint-job:
+  image: python:3.12-bookworm
   stage: test
   tags:
     - docker
+  before_script:
+  - python3 --version ; pip3 --version
+  - pip3 install -r requirements.txt
   script:
     - pylint src
     - pylint test
