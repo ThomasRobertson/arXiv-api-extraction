@@ -19,7 +19,7 @@ unit-test:
     - ls
     - pwd
   script:
-    - ./run_unit_test.sh
+    - /bin/sh run_unit_test.sh
   coverage: /(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/
   # artifacts:
   #   reports:
