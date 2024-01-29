@@ -1,12 +1,12 @@
+"""Using the data from a harvester, add records to the database."""
 from neo4j import GraphDatabase
-
-URI = "neo4j://localhost:7687"
 
 
 class GraphDBConnexion:
+    """Handle the database connection and provides functions to easily add records to it."""
+
     def __init__(self) -> None:
-        self.URI = "neo4j://localhost:7687"
-        self.driver = GraphDatabase.driver(self.URI)
+        self.driver = GraphDatabase.driver("neo4j://localhost:7687")
 
     def __del__(self) -> None:
         self.driver.close()

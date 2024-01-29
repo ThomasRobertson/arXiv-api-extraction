@@ -4,7 +4,6 @@ from typing import Any, Generator
 from xml.etree.ElementTree import Element
 import xml.etree.ElementTree as ET
 import requests
-from xml.etree import ElementTree
 
 
 class ArXivHarvesterOld:
@@ -50,7 +49,7 @@ class ArXivHarvesterOld:
     #         else:
     #             break
 
-    def __init__(self, from_date: str = "2012-12-12", until_date: str = "2012-12-19"):
+    def __init__(self):
         self.harvester = ArXivHarvester("2021-03-20", "2021-03-30", "cs")
         self.namespaces = {
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
@@ -139,9 +138,9 @@ class ArXivHarvester:
         try:
             xml_response = ET.fromstring(response.content)
             print(ET.tostring(xml_response, encoding="utf-8").decode()[:50])
-        except ElementTree.ParseError as e:
+        except ET.ParseError as e:
             print(f"Failed to parse XML: {e}")
-            raise Exception
+            raise ET.ParseError
 
         self._parse_records_response(xml_response)
 
