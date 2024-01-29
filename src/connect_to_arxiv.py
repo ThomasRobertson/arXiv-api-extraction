@@ -1,6 +1,7 @@
 """Connect to the arXiv API and return the results as entries of a FeedParserDict."""
+from http.client import HTTPException
 from time import sleep
-from typing import Any, Generator, Sequence
+from typing import Any, Generator
 from xml.etree.ElementTree import Element
 import xml.etree.ElementTree as ET
 import requests
@@ -48,10 +49,10 @@ class ArXivHarvester:
 
         if response.status_code is not 200:
             print(f"Cannot connect to ArXiv, error code: {response.status_code}")
-            raise requests.HTTPError
+            raise HTTPException
 
         try:
-            xml_response = ET.fromstring(response.content)
+            xml_response = ET.fromstring(response.content) # type: ignore
             print(ET.tostring(xml_response, encoding="utf-8").decode()[:50])
         except ET.ParseError as e:
             print(f"Failed to parse XML: {e}")
