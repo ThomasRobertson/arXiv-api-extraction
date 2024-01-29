@@ -2,6 +2,7 @@
 # pylint: disable=redefined-outer-name
 import pytest
 from neo4j import Driver
+from neo4j.exceptions import ServiceUnavailable
 from src import fill_data_base
 from src.connect_to_arxiv import ArXivHarvester
 import signal
@@ -27,7 +28,7 @@ def test_neo4j_connectivity(neo4j_driver: Driver):
         assert True
     except TimeoutException:
         pytest.fail("Connection to Neo4j timed out.")
-    except Exception as e:
+    except ServiceUnavailable as e:
         pytest.fail(f"{e}")
 
 

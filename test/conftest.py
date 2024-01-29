@@ -1,3 +1,4 @@
+# pylint: disable=redefined-outer-name
 """Pytest config file"""
 from neo4j import GraphDatabase
 import pytest
