@@ -1,129 +1,44 @@
 """Connect to the arXiv API and return the results as entries of a FeedParserDict."""
 from time import sleep
-from typing import Any, Generator
+from typing import Any, Generator, Sequence
 from xml.etree.ElementTree import Element
 import xml.etree.ElementTree as ET
 import requests
 
 
-class ArXivHarvesterOld:
-    """Access in bulk meta-data from arXiv using OAI-PHM."""
-
-    # def __init__(self, from_date: str = "2012-12-12", until_date: str = "2012-12-19"):
-    #     self.sickle = Sickle(
-    #         "https://export.arxiv.org/oai2",
-    #         retry_status_codes=[503],
-    #         default_retry_after=5,
-    #     )
-    #     self.records = self.sickle.ListRecords(
-    #         False,
-    #         **{
-    #             "metadataPrefix": "oai_dc",
-    #             "from": from_date,
-    #             "until": until_date,
-    #         },
-    #     )
-    #     self.namespaces = {
-    #         "xsi": "http://www.w3.org/2001/XMLSchema-instance",
-    #         "oai_dc": "http://www.openarchives.org/OAI/2.0/oai_dc/",
-    #         "oai": "http://www.openarchives.org/OAI/2.0/",
-    #         "dc": "http://purl.org/dc/elements/1.1/",
-    #     }
-    #     self.next_record()
-
-    # def next_record(self) -> None:
-    #     """Because Sickle is so well implemented, the "retry_after" an HTTP error doesn't work.
-    #     Here we are following arXiv API manual and waiting 5 seconds after a failed try.
-
-    #     Raises:
-    #         HTTPError: re-raising HTTP error
-    #     """
-    #     for i in range(3):
-    #         try:
-    #             self.record = self.records.next()
-    #         except requests.HTTPError as exc:
-    #             if i == 2:
-    #                 raise requests.HTTPError from exc
-    #             sleep(5)
-    #             continue
-    #         else:
-    #             break
-
-    def __init__(self):
-        self.harvester = ArXivHarvester("2021-03-20", "2021-03-30", "cs")
-        self.namespaces = {
-            "xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "oai_dc": "http://www.openarchives.org/OAI/2.0/oai_dc/",
-            "oai": "http://www.openarchives.org/OAI/2.0/",
-            "dc": "http://purl.org/dc/elements/1.1/",
-        }
-        self.record = next(self.harvester.next_record())
-
-    def next_record(self):
-        self.record = next(self.harvester.next_record())
-
-    def get_record_header(self) -> dict[str, str]:
-        header = {}
-        header_fields = ["identifier", "datestamp", "setSpec"]
-        for field in header_fields:
-            header[field] = self.record.find(
-                f"./oai:header/oai:{field}", self.namespaces
-            ).text
-        return header
-
-    def get_record_metadata(self) -> dict[str, list[str]]:
-        metadata = {}
-        metadata_fields = [
-            "dc:title",
-            "dc:creator",
-            "dc:subject",
-            "dc:description",
-            "dc:date",
-            "dc:type",
-            "dc:identifier",
-        ]
-        for field in metadata_fields:
-            metadata[field] = self._get_list_from_xml_element(field)
-        return metadata
-
-    def _get_list_from_xml_element(self, xml_block: str) -> list[str]:
-        block = self.record.findall(
-            f"./oai:metadata/oai_dc:dc/{xml_block}", self.namespaces
-        )
-        block_list = [item.text for item in block]
-        return block_list
-
-
 class ArXivHarvester:
     """Acces the ArXiv database"""
 
-    def __init__(self, from_date, until_date, set_cat) -> None:
+    def __init__(self, **kwargs) -> None:
+        self.from_date = kwargs.get("from_date")
+        self.until_date = kwargs.get("until_date")
+        self.set_cat = kwargs.get("set_cat")
+        self.resumption_token = None
         self.namespaces = {
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "oai_dc": "http://www.openarchives.org/OAI/2.0/oai_dc/",
             "oai": "http://www.openarchives.org/OAI/2.0/",
             "dc": "http://purl.org/dc/elements/1.1/",
         }
-        self.resumption_token = None
-        # https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc&from=2021-03-20&until=2021-03-23&set=cs
-        self.from_date = from_date
-        self.until_date = until_date
-        self.set = set_cat
-        self._get_new_records()
-
-        self.records: list[Element]
+        self.records = None
 
     def _get_new_records(self) -> None:
+        # Exemple URL : https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc&from=2021-03-20&until=2021-03-23&set=cs
         response = requests.Response
         for i in range(5):
-            if self.resumption_token is None:
-                response = requests.get(
-                    f"https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc&from={self.from_date}&until={self.until_date}&set={self.set}"
-                )
-            else:
+            if self.resumption_token is not None:
                 response = requests.get(
                     f"https://export.arxiv.org/oai2?verb=ListRecords&resumptionToken={self.resumption_token}"
                 )
+            else:
+                base_url = "https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc"
+                if self.from_date is not None:
+                    base_url += f"&from={self.from_date}"
+                if self.until_date is not None:
+                    base_url += f"&until={self.until_date}"
+                if self.set_cat is not None:
+                    base_url += f"&set={self.set_cat}"
+                response = requests.get(base_url)
 
             print(response.status_code)
             if response.status_code == 200:
@@ -162,6 +77,7 @@ class ArXivHarvester:
     def next_record(self) -> Generator[Element, Any, None]:
         while True:
             if self.records:  # If there are records left
+                self.record = self.records[0]
                 yield self.records.pop(0)  # Return the next record
             else:  # If no records are left
                 self._get_new_records()  # Fetch new records
@@ -169,4 +85,34 @@ class ArXivHarvester:
                     not self.records
                 ):  # If there are still no records after fetching, stop the generator
                     raise StopIteration
+                self.record = self.records[0]
                 yield self.records.pop(0)  # Return the first record of the new batch
+
+    def get_record_header(self, record: Element) -> dict[str, str]:
+        header = {}
+        header_fields = ["identifier", "datestamp", "setSpec"]
+        for field in header_fields:
+            header[field] = record.find(
+                f"./oai:header/oai:{field}", self.namespaces
+            ).text
+        return header
+
+    def get_record_metadata(self, record: Element) -> dict[str, list[str]]:
+        metadata = {}
+        metadata_fields = [
+            "dc:title",
+            "dc:creator",
+            "dc:subject",
+            "dc:description",
+            "dc:date",
+            "dc:type",
+            "dc:identifier",
+        ]
+        for field in metadata_fields:
+            metadata[field] = self._get_list_from_xml_element(field, record)
+        return metadata
+
+    def _get_list_from_xml_element(self, xml_block: str, record: Element) -> list[str]:
+        block = record.findall(f"./oai:metadata/oai_dc:dc/{xml_block}", self.namespaces)
+        block_list = [item.text for item in block]
+        return block_list
