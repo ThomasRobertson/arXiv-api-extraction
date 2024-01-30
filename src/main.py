@@ -32,11 +32,15 @@ def main(mock=False, neo4j_uri="neo4j://localhost:7687"):
     harvester = connect_to_arxiv.ArXivHarvester(
         from_date="2021-03-20", until_date="2021-03-30", set_cat="cs"
     )
-    record = next(harvester.next_record())
-    header = harvester.get_record_header(record)
-    metadata = harvester.get_record_metadata(record)
-    db_connexion = fill_data_base.GraphDBConnexion(neo4j_uri)
-    db_connexion.add_record(header, metadata)
+
+    db_connexion = fill_data_base.GraphDBConnexion("neo4j://localhost:7687")
+
+    for i, record in enumerate(harvester.next_record()):
+        # if i == 1:
+        #     break
+        header = harvester.get_record_header(record)
+        metadata = harvester.get_record_metadata(record)
+        db_connexion.add_record(header, metadata)
 
     if mock:
         m.stop()
