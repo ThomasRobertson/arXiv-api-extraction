@@ -2,6 +2,10 @@
 """Testing the connection to the arXiv API."""
 from xml.etree.ElementTree import Element
 from src.connect_to_arxiv import ArXivHarvester, ArXivRecord
+import requests_mock
+from pytest import raises
+from unittest.mock import patch
+import re
 
 
 def test_header_not_empty(record: ArXivRecord):
@@ -71,6 +75,18 @@ def test_metadata_contain_type(record: ArXivRecord):
     assert bool(metadata["dc:type"]) is True
 
 
+def test_record_is_valid(record: ArXivRecord):
+    assert isinstance(record, ArXivRecord)
+    if (
+        record.header is not None
+        and record.metadata is not None
+        and record.is_valid is True
+    ):
+        assert True
+    else:
+        assert False
+
+
 def test_next_record_different(harvester: ArXivHarvester, record: ArXivRecord):
     header1 = record.header
     record = next(harvester.next_record())
@@ -115,3 +131,48 @@ def test_all_harvest(harvester: ArXivHarvester, record: ArXivRecord):
     assert bool(last_record) is True
 
     assert first_record != last_record
+
+
+def test_correct_resumption_token_returned() -> None:
+    with requests_mock.Mocker() as m, patch(
+        "src.connect_to_arxiv.sleep", return_value=None
+    ):
+        m.get(re.compile("https://export.arxiv.org/oai2*"), status_code=503)
+
+        with raises(ArXivHarvester.CustomHTTPException) as e:
+            harvester = ArXivHarvester(
+                from_date="2021-03-20",
+                until_date="2021-03-30",
+                set_cat="cs",
+                resumption_token="6965856|1001",
+            )
+            next(harvester.next_record())
+
+        assert e.value.resumption_token == "6965856|1001"
+
+
+def test_resumption_token_with_harvester(requests_mock):
+    with open("mock-response/request2.xml", "r", encoding="utf-8") as file:
+        data2 = file.read()
+    requests_mock.get(
+        "https://export.arxiv.org/oai2?verb=ListRecords&resumptionToken=6965856|1001",
+        text=data2,
+    )
+
+    harvester = ArXivHarvester(
+        from_date="2021-03-20",
+        until_date="2021-03-30",
+        set_cat="cs",
+        resumption_token="6965856|1001",
+    )
+
+    record = next(harvester.next_record())
+    assert isinstance(record, ArXivRecord)
+    if (
+        record.header is not None
+        and record.metadata is not None
+        and record.is_valid is True
+    ):
+        assert True
+    else:
+        assert False
