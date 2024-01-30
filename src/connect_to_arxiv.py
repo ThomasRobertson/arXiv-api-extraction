@@ -31,7 +31,10 @@ class ArXivHarvester:
                 response = requests.get(
                     f"https://export.arxiv.org/oai2?verb=ListRecords&resumptionToken={self.resumption_token}"
                 )
-            else:
+                print(
+                    f"INFO: Getting next request from ArXiv ({self.resumption_token})."
+                )
+            elif self.records is None:
                 base_url = "https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc"
                 if self.from_date is not None:
                     base_url += f"&from={self.from_date}"
