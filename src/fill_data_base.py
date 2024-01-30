@@ -1,6 +1,6 @@
 """Using the data from a harvester, add records to the database."""
 from neo4j import GraphDatabase
-from xml.etree.ElementTree import Element
+from connect_to_arxiv import ArXivRecord
 
 
 class GraphDBConnexion:
@@ -12,11 +12,13 @@ class GraphDBConnexion:
     def __del__(self) -> None:
         self.driver.close()
 
-    def add_record(self, header: dict[str, str], metadata: dict[str, list[str]]):
+    def add_record(self, record: ArXivRecord) -> None:
         with self.driver.session(database="neo4j") as session:
-            session.execute_write(self.record_tx, header, metadata)
+            session.execute_write(self.record_tx, record.header, record.metadata)
 
-    def record_tx(self, tx, header: dict[str, str], metadata: dict[str, list[str]]):
+    def record_tx(
+        self, tx, header: dict[str, str], metadata: dict[str, list[str]]
+    ) -> None:
         # Create the Record node with properties from metadata
         record = tx.run(
             """

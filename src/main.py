@@ -38,9 +38,7 @@ def main(mock=False, neo4j_uri="neo4j://localhost:7687"):
     for i, record in enumerate(harvester.next_record()):
         # if i == 1:
         #     break
-        header = harvester.get_record_header(record)
-        metadata = harvester.get_record_metadata(record)
-        db_connexion.add_record(header, metadata)
+        db_connexion.add_record(record)
 
     if mock:
         m.stop()
