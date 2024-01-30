@@ -1,6 +1,6 @@
 """Using the data from a harvester, add records to the database."""
 from neo4j import GraphDatabase
-from connect_to_arxiv import ArXivRecord
+from src.connect_to_arxiv import ArXivRecord
 
 
 class GraphDBConnexion:
