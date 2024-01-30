@@ -2,6 +2,13 @@
 
 cd /app
 
+python -m venv .venv
+
+source .venv/bin/activate
+
+pip --version
+python --version
+
 # install requirements
 pip install -r requirements.txt
 

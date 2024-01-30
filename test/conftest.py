@@ -44,7 +44,7 @@ def record(harvester):
 
 @pytest.fixture(scope="session")
 def neo4j_driver():
-    driver = GraphDatabase.driver("neo4j://localhost:7687/neo4j")
+    driver = GraphDatabase.driver("neo4j://neo4j:7687")
     yield driver
     driver.close()
 

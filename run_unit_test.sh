@@ -1,5 +1,7 @@
 #!/bin/bash
 
+chmod +x ci-cd/python-init.sh
+
 # Start services
 docker compose -f docker-compose-unit-test.yml up -d
 
