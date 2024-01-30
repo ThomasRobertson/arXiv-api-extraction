@@ -11,6 +11,8 @@ stages:          # List of stages for jobs, and their order of execution
 
 unit-test:
   image: docker:cli
+  tags:
+    - shell
   stage: test
   before_script:
     - uname -a
