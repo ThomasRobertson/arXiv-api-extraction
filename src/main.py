@@ -4,7 +4,7 @@ import fill_data_base
 import requests_mock
 
 
-def main(mock=False):
+def main(mock=False, neo4j_uri="neo4j://localhost:7687"):
     m = requests_mock.Mocker()
     if mock:
         m.start()
@@ -35,8 +35,8 @@ def main(mock=False):
     record = next(harvester.next_record())
     header = harvester.get_record_header(record)
     metadata = harvester.get_record_metadata(record)
-    dbConnexion = fill_data_base.GraphDBConnexion("neo4j://localhost:7687")
-    dbConnexion.add_record(header, metadata)
+    db_connexion = fill_data_base.GraphDBConnexion(neo4j_uri)
+    db_connexion.add_record(header, metadata)
 
     if mock:
         m.stop()
@@ -45,5 +45,6 @@ def main(mock=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mock", action="store_true")
+    parser.add_argument("--neo4j_uri", action="store_true")
     args = parser.parse_args()
-    main(mock=args.mock)
+    main(mock=args.mock, neo4j_uri=args.neo4j_uri)

@@ -6,8 +6,8 @@ from xml.etree.ElementTree import Element
 class GraphDBConnexion:
     """Handle the database connection and provides functions to easily add records to it."""
 
-    def __init__(self) -> None:
-        self.driver = GraphDatabase.driver("neo4j://localhost:7687")
+    def __init__(self, uri: str) -> None:
+        self.driver = GraphDatabase.driver(uri)
 
     def __del__(self) -> None:
         self.driver.close()
