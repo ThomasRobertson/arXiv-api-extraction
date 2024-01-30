@@ -47,12 +47,12 @@ class ArXivHarvester:
             elif response.status_code == 503:
                 sleep(1 + i)  # incrementing the sleep time each time
 
-        if response.status_code is not 200:
+        if response.status_code != 200:
             print(f"Cannot connect to ArXiv, error code: {response.status_code}")
             raise HTTPException
 
         try:
-            xml_response = ET.fromstring(response.content) # type: ignore
+            xml_response = ET.fromstring(response.content)  # type: ignore
             print(ET.tostring(xml_response, encoding="utf-8").decode()[:50])
         except ET.ParseError as e:
             print(f"Failed to parse XML: {e}")
@@ -93,9 +93,11 @@ class ArXivHarvester:
         header = {}
         header_fields = ["identifier", "datestamp", "setSpec"]
         for field in header_fields:
-            header[field] = record.find(
-                f"./oai:header/oai:{field}", self.namespaces
-            ).text
+            record_field = record.find(f"./oai:header/oai:{field}", self.namespaces)
+            if record_field is not None:
+                header[field] = record_field.text
+            else:
+                header[field] = None
         return header
 
     def get_record_metadata(self, record: Element) -> dict[str, list[str]]:
@@ -110,10 +112,12 @@ class ArXivHarvester:
             "dc:identifier",
         ]
         for field in metadata_fields:
-            metadata[field] = self._get_list_from_xml_element(field, record)
+            record_field = record.findall(
+                f"./oai:metadata/oai_dc:dc/{field}", self.namespaces
+            )
+            if record_field:
+                record_field = [item.text for item in record_field]
+            else:
+                record_field = None
+            metadata[field] = record_field
         return metadata
-
-    def _get_list_from_xml_element(self, xml_block: str, record: Element) -> list[str]:
-        block = record.findall(f"./oai:metadata/oai_dc:dc/{xml_block}", self.namespaces)
-        block_list = [item.text for item in block]
-        return block_list
