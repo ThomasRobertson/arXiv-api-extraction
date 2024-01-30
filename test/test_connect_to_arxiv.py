@@ -15,16 +15,22 @@ def test_header_not_empty(record: ArXivRecord):
 
 def test_header_contain_identifier(record: ArXivRecord):
     header = record.header
+    if header is None:
+        assert False
     assert isinstance(header["identifier"], str)
 
 
 def test_header_contain_datestamp(record: ArXivRecord):
     header = record.header
+    if header is None:
+        assert False
     assert isinstance(header["datestamp"], str)
 
 
 def test_header_contain_setspec(record: ArXivRecord):
     header = record.header
+    if header is None:
+        assert False
     assert isinstance(header["setSpec"], str)
 
 
@@ -35,42 +41,56 @@ def test_metadata_not_empty(record: ArXivRecord):
 
 def test_metadata_contain_title(record: ArXivRecord):
     metadata = record.metadata
+    if metadata is None:
+        assert False
     assert isinstance(metadata["dc:title"], list)
     assert bool(metadata["dc:title"]) is True
 
 
 def test_metadata_contain_creator(record: ArXivRecord):
     metadata = record.metadata
+    if metadata is None:
+        assert False
     assert isinstance(metadata["dc:creator"], list)
     assert bool(metadata["dc:creator"]) is True
 
 
 def test_metadata_contain_subject(record: ArXivRecord):
     metadata = record.metadata
+    if metadata is None:
+        assert False
     assert isinstance(metadata["dc:subject"], list)
     assert bool(metadata["dc:subject"]) is True
 
 
 def test_metadata_contain_description(record: ArXivRecord):
     metadata = record.metadata
+    if metadata is None:
+        assert False
     assert isinstance(metadata["dc:description"], list)
     assert bool(metadata["dc:description"]) is True
 
 
 def test_metadata_contain_date(record: ArXivRecord):
     metadata = record.metadata
+    if metadata is None:
+        assert False
     assert isinstance(metadata["dc:date"], list)
     assert bool(metadata["dc:date"]) is True
 
 
 def test_metadata_contain_identifier(record: ArXivRecord):
     metadata = record.metadata
+    if metadata is None:
+        assert False
     assert isinstance(metadata["dc:identifier"], list)
     assert bool(metadata["dc:identifier"]) is True
 
 
 def test_metadata_contain_type(record: ArXivRecord):
     metadata = record.metadata
+    if metadata is None:
+        assert False
     assert isinstance(metadata["dc:type"], list)
     assert bool(metadata["dc:type"]) is True
 
