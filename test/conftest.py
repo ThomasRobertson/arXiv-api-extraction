@@ -9,21 +9,21 @@ from src import connect_to_arxiv, fill_data_base
 
 @pytest.fixture(scope="function")
 def harvester(requests_mock) -> connect_to_arxiv.ArXivHarvester:
-    with open("mock-response/request1.xml", "r") as file:
+    with open("mock-response/request1.xml", "r", encoding="utf-8") as file:
         data1 = file.read()
     requests_mock.get(
         "https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc&from=2021-03-20&until=2021-03-30&set=cs",
         text=data1,
     )
 
-    with open("mock-response/request2.xml", "r") as file:
+    with open("mock-response/request2.xml", "r", encoding="utf-8") as file:
         data2 = file.read()
     requests_mock.get(
         "https://export.arxiv.org/oai2?verb=ListRecords&resumptionToken=6965856|1001",
         text=data2,
     )
 
-    with open("mock-response/request3.xml", "r") as file:
+    with open("mock-response/request3.xml", "r", encoding="utf-8") as file:
         data3 = file.read()
     requests_mock.get(
         "https://export.arxiv.org/oai2?verb=ListRecords&resumptionToken=6965856|2001",

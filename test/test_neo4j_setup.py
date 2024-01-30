@@ -3,8 +3,9 @@
 import pytest
 from neo4j import Driver
 from neo4j.exceptions import ServiceUnavailable
-from src import fill_data_base
-from src.connect_to_arxiv import ArXivHarvester
+
+# from src import fill_data_base
+# from src.connect_to_arxiv import ArXivHarvester
 import signal
 
 
