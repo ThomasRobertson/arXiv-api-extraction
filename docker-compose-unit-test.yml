@@ -8,9 +8,10 @@ services:
       - ./test:/app/test:ro
       - ./requirements.txt:/app/requirements.txt:ro
       - ./ci-cd/python-init.sh:/app/python-init.sh:ro
+      - ./mock-response:/app/mock-response:ro
     depends_on:
       - neo4j
-    entrypoint: ["./app/python-init.sh"]
+    entrypoint: [ "./app/python-init.sh" ]
   neo4j:
     image: neo4j:5.15.0-community-bullseye
     hostname: neo4j
