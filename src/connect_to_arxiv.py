@@ -93,7 +93,7 @@ class ArXivHarvester:
                 if (
                     not self.records
                 ):  # If there are still no records after fetching, stop the generator
-                    raise StopIteration
+                    return
                 self.record = self.records[0]
                 yield self.records.pop(0)  # Return the first record of the new batch
 
