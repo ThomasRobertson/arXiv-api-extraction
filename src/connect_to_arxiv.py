@@ -39,21 +39,26 @@ class ArXivHarvester:
                     base_url += f"&until={self.until_date}"
                 if self.set_cat is not None:
                     base_url += f"&set={self.set_cat}"
+                print("INFO: Getting first request from ArXiv.")
                 response = requests.get(base_url)
+            else:
+                print("INFO: Got all of the records from ArXiv.")
+                return
 
-            print(response.status_code)
+            # print(response.status_code)
             if response.status_code == 200:
                 break
             elif response.status_code == 503:
+                print(f"WARN: Error 503 received. Sleep {i + 1} seconds.")
                 sleep(1 + i)  # incrementing the sleep time each time
 
         if response.status_code != 200:
-            print(f"Cannot connect to ArXiv, error code: {response.status_code}")
+            print(f"ERROR: Cannot connect to ArXiv, error code: {response.status_code}")
             raise HTTPException
 
         try:
             xml_response = ET.fromstring(response.content)  # type: ignore
-            print(ET.tostring(xml_response, encoding="utf-8").decode()[:50])
+            # print(ET.tostring(xml_response, encoding="utf-8").decode()[:50])
         except ET.ParseError as e:
             print(f"Failed to parse XML: {e}")
             raise ET.ParseError
