@@ -66,11 +66,19 @@ class ArXivRecord:
 class ArXivHarvester:
     """Acces the ArXiv database"""
 
+    class CustomHTTPException(HTTPException):
+        """Custom HTTP Exception that forward the status code and the resumption token, if any."""
+
+        def __init__(self, status_code, resumption_token) -> None:
+            super().__init__()
+            self.status_code = status_code
+            self.resumption_token = resumption_token
+
     def __init__(self, **kwargs) -> None:
         self._from_date = kwargs.get("from_date")
         self._until_date = kwargs.get("until_date")
         self._set_cat = kwargs.get("set_cat")
-        self._resumption_token = None
+        self._resumption_token = kwargs.get("resumption_token")
         self._namespaces = {
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "oai_dc": "http://www.openarchives.org/OAI/2.0/oai_dc/",
@@ -113,7 +121,9 @@ class ArXivHarvester:
 
         if response.status_code != 200:
             print(f"ERROR: Cannot connect to ArXiv, error code: {response.status_code}")
-            raise HTTPException
+            raise ArXivHarvester.CustomHTTPException(
+                response.status_code, self._resumption_token
+            )
 
         try:
             xml_response = ET.fromstring(response.content)  # type: ignore

@@ -1,10 +1,11 @@
 import argparse
+from http.client import HTTPException
 import connect_to_arxiv
 import fill_data_base
 import requests_mock
 
 
-def main(mock=False, neo4j_uri="neo4j://localhost:7687"):
+def main(mock=False, neo4j_uri="neo4j://localhost:7687", resumption_token=None):
     m = requests_mock.Mocker()
     if mock:
         m.start()
@@ -30,7 +31,10 @@ def main(mock=False, neo4j_uri="neo4j://localhost:7687"):
         )
 
     harvester = connect_to_arxiv.ArXivHarvester(
-        from_date="2021-03-20", until_date="2021-03-30", set_cat="cs"
+        from_date="2021-03-20",
+        until_date="2021-03-30",
+        set_cat="cs",
+        resumption_token=resumption_token,
     )
 
     db_connexion = fill_data_base.GraphDBConnexion("neo4j://localhost:7687")
@@ -48,5 +52,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mock", action="store_true")
     parser.add_argument("--neo4j_uri", action="store_true")
+    parser.add_argument("--resumption_token", action="store_true")
     args = parser.parse_args()
-    main(mock=args.mock, neo4j_uri=args.neo4j_uri)
+    try:
+        main(
+            mock=args.mock,
+            neo4j_uri=args.neo4j_uri,
+            resumption_token=args.resumption_token,
+        )
+    except connect_to_arxiv.ArXivHarvester.CustomHTTPException as e:
+        error_message = f"ERROR: Request to ArVix timed out (Error {e.status_code})."
+        error_message += f' Last resumption token is "{e.resumption_token}"'
+        print(f"ERROR: Request to ArVix timed out.")
