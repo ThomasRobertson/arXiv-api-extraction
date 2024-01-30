@@ -13,10 +13,13 @@ class GraphDBConnexion:
         self.driver.close()
 
     def add_record(self, record: ArXivRecord) -> None:
+        if record.header is None or record.metadata is None or record.is_valid is False:
+            print(f"ERROR: Record is not valid, canno't add it.")
+            return
         with self.driver.session(database="neo4j") as session:
-            session.execute_write(self.record_tx, record.header, record.metadata)
+            session.execute_write(self._record_tx, record.header, record.metadata)
 
-    def record_tx(
+    def _record_tx(
         self, tx, header: dict[str, str], metadata: dict[str, list[str]]
     ) -> None:
         # Create the Record node with properties from metadata
