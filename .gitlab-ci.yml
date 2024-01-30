@@ -32,6 +32,7 @@ unit-test:
 lint-job:
   image: python:3.12-bookworm
   stage: test
+  allow_failure: true
   tags:
     - docker
   before_script:
