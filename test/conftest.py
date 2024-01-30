@@ -37,14 +37,14 @@ def harvester(requests_mock) -> connect_to_arxiv.ArXivHarvester:
 
 
 @pytest.fixture(scope="function")
-def record(harvester):
+def record(harvester) -> connect_to_arxiv.ArXivRecord:
     record_return = next(harvester.next_record())
     return record_return
 
 
 @pytest.fixture(scope="session")
 def neo4j_driver():
-    driver = GraphDatabase.driver("neo4j://neo4j:7687")
+    driver = GraphDatabase.driver("neo4j://localhost:7687")
     yield driver
     driver.close()
 
