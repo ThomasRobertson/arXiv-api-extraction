@@ -22,6 +22,7 @@ pytest-cov==4.1.0
 pytest-sugar==0.9.7
 pytz==2023.3.post1
 requests==2.31.0
+requests-mock==1.11.0
 setuptools==69.0.3
 Sickle==0.7.0
 six==1.16.0
