@@ -6,6 +6,8 @@ unit-test-harvester:
   stage: test
   image: docker:cli
   tags: [shell]
+  variables:
+    GIT_STRATEGY: none
   before_script:
     - uname -a
     - cd harvest-and-collect
@@ -20,6 +22,8 @@ unit-test-api:
   stage: test
   image: docker:cli
   tags: [shell]
+  variables:
+    GIT_STRATEGY: none
   before_script:
     - uname -a
     - cd api-endpoint
