@@ -1,7 +1,7 @@
 # pylint: disable=redefined-outer-name
 """Testing the connection to the arXiv API."""
 from xml.etree.ElementTree import Element
-from src.connect_to_arxiv import ArXivHarvester, ArXivRecord
+from harvest_and_collect.connect_to_arxiv import ArXivHarvester, ArXivRecord
 import requests_mock
 from pytest import raises
 from unittest.mock import patch
@@ -155,7 +155,7 @@ def test_all_harvest(harvester: ArXivHarvester, record: ArXivRecord):
 
 def test_correct_resumption_token_returned() -> None:
     with requests_mock.Mocker() as m, patch(
-        "src.connect_to_arxiv.sleep", return_value=None
+        "harvest_and_collect.connect_to_arxiv.sleep", return_value=None
     ):
         m.get(re.compile("https://export.arxiv.org/oai2*"), status_code=503)
 

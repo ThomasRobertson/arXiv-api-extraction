@@ -13,6 +13,6 @@ python --version
 pip install -r requirements.txt
 
 # launch pytest
-pytest --cov=src
+pytest --cov=harvest_and_collect
 
 exit $?

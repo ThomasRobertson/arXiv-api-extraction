@@ -4,7 +4,7 @@ services:
     image: python:3.12
     container_name: python
     volumes:
-      - ./src:/app/src:ro
+      - ./harvest_and_collect:/app/harvest_and_collect:ro
       - ./test:/app/test:ro
       - ./requirements.txt:/app/requirements.txt:ro
       - ./ci-cd/python-init.sh:/app/python-init.sh:ro

@@ -2,13 +2,14 @@
 """Pytest config file"""
 from neo4j import GraphDatabase
 import pytest
-from src import connect_to_arxiv, fill_data_base
+from harvest_and_collect.connect_to_arxiv import ArXivHarvester, ArXivRecord
+from harvest_and_collect.fill_data_base import GraphDBConnexion
 
 # https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc&from=2021-03-20&until=2021-03-23&set=cs
 
 
 @pytest.fixture(scope="function")
-def harvester(requests_mock) -> connect_to_arxiv.ArXivHarvester:
+def harvester(requests_mock) -> ArXivHarvester:
     with open("mock-response/request1.xml", "r", encoding="utf-8") as file:
         data1 = file.read()
     requests_mock.get(
@@ -30,14 +31,14 @@ def harvester(requests_mock) -> connect_to_arxiv.ArXivHarvester:
         text=data3,
     )
 
-    harvester_return = connect_to_arxiv.ArXivHarvester(
+    harvester_return = ArXivHarvester(
         from_date="2021-03-20", until_date="2021-03-30", set_cat="cs"
     )
     return harvester_return
 
 
 @pytest.fixture(scope="function")
-def record(harvester) -> connect_to_arxiv.ArXivRecord:
+def record(harvester) -> ArXivRecord:
     record_return = next(harvester.next_record())
     return record_return
 
@@ -51,5 +52,5 @@ def neo4j_driver():
 
 @pytest.fixture(scope="session")
 def graph_db_connexion():
-    connexion = fill_data_base.GraphDBConnexion
+    connexion = GraphDBConnexion
     return connexion

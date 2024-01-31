@@ -1,6 +1,6 @@
 """Using the data from a harvester, add records to the database."""
 from neo4j import GraphDatabase
-from src.connect_to_arxiv import ArXivRecord
+from harvest_and_collect.connect_to_arxiv import ArXivRecord
 
 
 class GraphDBConnexion:
@@ -28,7 +28,7 @@ class GraphDBConnexion:
             MERGE (r:Record {identifier: $identifier, title: $title, description: $description, date: $date, type: $type})
             RETURN r.identifier AS record
             """,
-            identifier=metadata["dc:identifier"],
+            identifier=header["identifier"],
             title=metadata["dc:title"],
             description=metadata["dc:description"],
             date=metadata["dc:date"],
@@ -62,7 +62,7 @@ class GraphDBConnexion:
                 MERGE (r)-[rel:HAS_AUTHOR]->(a)
                 RETURN type(rel) AS relationshipType
                 """,
-                identifier=metadata["dc:identifier"],
+                identifier=header["identifier"],
                 creator=creator,
             )
 
@@ -73,7 +73,7 @@ class GraphDBConnexion:
             MERGE (r)-[rel:HAS_SETSPEC]->(s)
             RETURN type(rel) AS relationshipType
             """,
-            identifier=metadata["dc:identifier"],
+            identifier=header["identifier"],
             setSpec=header["setSpec"],
         )
 
@@ -95,6 +95,6 @@ class GraphDBConnexion:
                 MERGE (r)-[rel:HAS_SUBJECT]->(s)
                 RETURN type(rel) AS relationshipType
                 """,
-                identifier=metadata["dc:identifier"],
+                identifier=header["identifier"],
                 subject=subject,
             )
