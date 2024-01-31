@@ -21,6 +21,12 @@ app = create_app()
 api = Api(app)
 
 
+@api.route("/hello")
+class HelloWorld(Resource):
+    def get(self):
+        return {"hello": "world"}
+
+
 @api.route("/records")
 class ListRecords(Resource):
     # Define the parser and add the 'limit' and 'category' arguments
