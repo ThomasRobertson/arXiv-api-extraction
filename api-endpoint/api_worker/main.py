@@ -29,22 +29,29 @@ class HelloWorld(Resource):
 
 @api.route("/records")
 class ListRecords(Resource):
-    # Define the parser and add the 'limit' and 'category' arguments
+    # Define the parser and add the 'limit', 'category', and 'author' arguments
     parser = reqparse.RequestParser()
     parser.add_argument("limit", type=int, help="Limit the number of records returned")
     parser.add_argument("category", type=str, help="Category of the records to return")
+    parser.add_argument("author", type=str, help="Author of the records to return")
 
     def get(self):
         # Parse the arguments
         args = self.parser.parse_args()
         limit = args.get("limit")
         category = args.get("category")
+        author = args.get("author")
 
         with app.config["neo4j_driver"].driver.session() as session:
-            # Modify the Cypher query to match records that have a connection to "Subject" nodes
-            query = "MATCH (n:Record)-[:HAS_SUBJECT]->(s:Subject)"
+            query = "MATCH (n:Record)-[:HAS_SUBJECT]->(s:Subject), (n:Record)-[:HAS_AUTHOR]->(a:Author)"
             if category is not None:
                 query += f" WHERE s.subject = '{category}'"
+            if author is not None:
+                query += (
+                    f" AND a.creator = '{author}'"
+                    if "WHERE" in query
+                    else f" WHERE a.creator = '{author}'"
+                )
             query += " RETURN n.identifier AS identifier"
             if limit is not None:
                 query += f" LIMIT {limit}"
