@@ -17,9 +17,21 @@ db_connexion = GraphDBConnexion("neo4j://localhost:7687")
 
 @api.route("/records")
 class ListRecords(Resource):
+    # Define the parser and add the 'limit' argument
+    parser = reqparse.RequestParser()
+    parser.add_argument("limit", type=int, help="Limit the number of records returned")
+
     def get(self):
+        # Parse the arguments
+        args = self.parser.parse_args()
+        limit = args.get("limit")
+
         with db_connexion.driver.session() as session:
-            result = session.run("MATCH (n:Record) RETURN n.identifier AS identifier")
+            # Add the LIMIT clause to the Cypher query if a limit is specified
+            query = "MATCH (n:Record) RETURN n.identifier AS identifier"
+            if limit is not None:
+                query += f" LIMIT {limit}"
+            result = session.run(query)
             return {"records": [record["identifier"] for record in result]}
 
 
