@@ -23,5 +23,8 @@ def test_index(app, client):
     assert res.status_code == 200
     expected = {"hello": "world"}
 
-    # Clean up the test data
-    # session.run("MATCH (n:Record)-[r:HAS_SUBJECT]->(s:Subject) DELETE n, r, s")
+
+def test_get_records_with_author(client):
+    response = client.get("/records?author=pytest_author")
+    assert response.status_code == 200
+    assert response.json == {"records": ["pytest_test1", "pytest_test2"]}
