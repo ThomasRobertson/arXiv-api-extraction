@@ -9,7 +9,15 @@ from harvest_and_collect.connect_to_arxiv import ArXivRecord
 from harvest_and_collect.fill_data_base import GraphDBConnexion
 from flask_restx import reqparse
 
-db_connexion = GraphDBConnexion("neo4j://localhost:7687")
+
+def create_app() -> Flask:
+    app = Flask(__name__)
+    app.config["neo4j_driver"] = GraphDBConnexion("neo4j://localhost:7687")
+    return app
+
+
+app = create_app()
+api = Api(app)
 
 
 @api.route("/records")
@@ -25,7 +33,7 @@ class ListRecords(Resource):
         limit = args.get("limit")
         category = args.get("category")
 
-        with db_connexion.driver.session() as session:
+        with app.config["neo4j_driver"].driver.session() as session:
             # Modify the Cypher query to match records that have a connection to "Subject" nodes
             query = "MATCH (n:Record)-[:HAS_SUBJECT]->(s:Subject)"
             if category is not None:
@@ -37,12 +45,5 @@ class ListRecords(Resource):
             return {"records": [record["identifier"] for record in result]}
 
 
-def create_app() -> Flask:
-    app = Flask(__name__)
-    api = Api(app)
-    return app
-
-
 if __name__ == "__main__":
-    app = create_app()
     app.run(debug=True)
