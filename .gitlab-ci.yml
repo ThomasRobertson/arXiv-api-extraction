@@ -2,13 +2,27 @@ stages:
   - test
   - release
 
-unit-test:
+unit-test-harvester:
   stage: test
   image: docker:cli
   tags: [shell]
   before_script:
     - uname -a
     - cd harvest-and-collect
+    - chmod +x run_unit_test.sh
+    - ls -l
+    - pwd
+  script:
+    - /bin/sh run_unit_test.sh
+  coverage: /(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/
+
+unit-test-api:
+  stage: test
+  image: docker:cli
+  tags: [shell]
+  before_script:
+    - uname -a
+    - cd api-endpoint
     - chmod +x run_unit_test.sh
     - ls -l
     - pwd

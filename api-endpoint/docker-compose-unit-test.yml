@@ -4,16 +4,16 @@ services:
     image: python:3.12
     container_name: python
     volumes:
-      - ./harvest_and_collect:/app/harvest_and_collect:ro
+      - ./api_worker:/app/api_worker:ro
+      - ../harvest-and-collect/harvest_and_collect:/app/harvest_and_collect
       - ./test:/app/test:ro
       - ../requirements.txt:/app/requirements.txt:ro
       - ./ci-cd/python-init.sh:/app/python-init.sh:ro
-      - ./mock-response:/app/mock-response:ro
     depends_on:
       - neo4j
     entrypoint: [ "./app/python-init.sh" ]
     networks:
-      - docker-neo4j
+      - docker-neo4j-api
   neo4j:
     image: neo4j:5.15.0-community-bullseye
     hostname: neo4j
@@ -27,10 +27,10 @@ services:
     logging:
       driver: none
     networks:
-      - docker-neo4j
+      - docker-neo4j-api
 
 networks:
-  docker-neo4j:
+  docker-neo4j-api:
     driver: bridge
     ipam:
       config:
