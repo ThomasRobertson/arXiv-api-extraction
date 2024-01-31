@@ -3,6 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import argparse
 from flask import Flask
 from flask_restx import Api, Resource, reqparse
 from harvest_and_collect.connect_to_arxiv import ArXivRecord
@@ -46,4 +47,10 @@ class ListRecords(Resource):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Launch the Flask app with a custom Neo4j URI."
+    )
+    # Add the '--neo4j_uri' argument
+    parser.add_argument("--neo4j_uri", action="store_true")
+    args = parser.parse_args()
     app.run(debug=True)
