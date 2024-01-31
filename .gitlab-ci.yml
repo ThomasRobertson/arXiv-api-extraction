@@ -1,7 +1,11 @@
+stages:
+  - test
+  - release
+
 unit-test:
+  stage: test
   image: docker:cli
-  tags:
-    - shell
+  tags: [shell]
   before_script:
     - uname -a
     - cd harvest-and-collect
@@ -13,10 +17,10 @@ unit-test:
   coverage: /(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/
 
 lint-job:
+  stage: test
   image: python:3.12-bookworm
   allow_failure: true
-  tags:
-    - docker
+  tags: [docker]
   before_script:
     - uname -a
     - cd harvest-and-collect
@@ -24,3 +28,15 @@ lint-job:
     - pip3 install -r requirements.txt
   script:
     - pylint harvest_and_collect test
+
+
+release:
+  image: node:latest
+  tags: [docker]
+  stage: release
+  before_script:
+    - npm install @semantic-release/git @semantic-release/gitlab
+  script:
+    - npx semantic-release
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
