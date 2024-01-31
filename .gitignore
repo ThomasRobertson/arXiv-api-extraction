@@ -40,3 +40,5 @@ celerybeat.pid
 
 # pytype static type analyzer
 .pytype/
+
+api-endpoint/harvest_and_collect
