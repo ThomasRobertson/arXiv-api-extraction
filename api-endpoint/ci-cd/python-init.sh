@@ -16,11 +16,11 @@ export PYTHONPATH=$PWD
 
 # wait for Neo4j to be ready
 until curl http://neo4j:7474; do
-  >&2 echo "Neo4j is unavailable - sleeping"
+  echo "Neo4j is unavailable - sleeping"
   sleep 1
 done
 
->&2 echo "Neo4j is up - executing command"
+echo "Neo4j is up - executing command"
 
 
 # launch pytest
