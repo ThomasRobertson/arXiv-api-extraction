@@ -1,4 +1,3 @@
-"""Connect to the arXiv API and return the results as entries of a FeedParserDict."""
 from http.client import HTTPException
 from time import sleep
 from typing import Any, Generator
@@ -75,10 +74,26 @@ class ArXivHarvester:
             self.resumption_token = resumption_token
 
     def __init__(self, **kwargs) -> None:
-        self._from_date = kwargs.get("from_date")
-        self._until_date = kwargs.get("until_date")
-        self._set_cat = kwargs.get("set_cat")
-        self._resumption_token = kwargs.get("resumption_token")
+        if "from_date" in kwargs and kwargs.get("from_date") is not False:
+            self._from_date = kwargs.get("from_date")
+        else:
+            self._from_date = None
+
+        if "until_date" in kwargs and kwargs.get("until_date") is not False:
+            self._until_date = kwargs.get("until_date")
+        else:
+            self._until_date = None
+
+        if "set_cat" in kwargs and kwargs.get("set_cat") is not False:
+            self._set_cat = kwargs.get("set_cat")
+        else:
+            self._set_cat = None
+
+        if "resumption_token" in kwargs and kwargs.get("resumption_token") is not False:
+            self._resumption_token = kwargs.get("resumption_token")
+        else:
+            self._resumption_token = None
+
         self._namespaces = {
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "oai_dc": "http://www.openarchives.org/OAI/2.0/oai_dc/",
