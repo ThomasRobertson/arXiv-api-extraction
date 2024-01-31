@@ -15,7 +15,6 @@ def app() -> Flask:
         app.config["neo4j_driver"] = GraphDBConnexion("neo4j://neo4j:7687")
     except (ServiceUnavailable, ValueError):
         app.config["neo4j_driver"] = GraphDBConnexion("neo4j://localhost:7687")
-    # app.config["neo4j_driver"] = GraphDBConnexion("neo4j://neo4j:7687")
     app.config.update(
         {
             "TESTING": True,
@@ -38,10 +37,7 @@ def db_connexion(app) -> GraphDBConnexion:
         )  # Clean the database before doing any test
         # Create some test data
         session.run(
-            "CREATE (:Record {identifier: 'pytest_test1'})-[:HAS_SUBJECT]->(:Subject {subject: 'pytest_test'})"
-        )
-        session.run(
-            "CREATE (:Record {identifier: 'pytest_test2'})-[:HAS_SUBJECT]->(:Subject {subject: 'pytest_test'})"
+            "CREATE (s:Subject {subject: 'pytest_test'}), (a:Author {name: 'pytest_author'}), (r1:Record {identifier: 'pytest_test1'}), (r2:Record {identifier: 'pytest_test2'}), (r1)-[:HAS_SUBJECT]->(s), (r1)-[:HAS_AUTHOR]->(a), (r2)-[:HAS_SUBJECT]->(s), (r2)-[:HAS_AUTHOR]->(a)"
         )
     yield db_connexion_return
 

@@ -31,7 +31,3 @@ services:
 
 networks:
   docker-neo4j-api:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.31.27.0/24
