@@ -43,15 +43,14 @@ class ListRecords(Resource):
         author = args.get("author")
 
         with app.config["neo4j_driver"].driver.session() as session:
-            query = "MATCH (n:Record)-[:HAS_SUBJECT]->(s:Subject), (n:Record)-[:HAS_AUTHOR]->(a:Author)"
+            query = "MATCH (n:Record) OPTIONAL MATCH (n)-[:HAS_SUBJECT]->(s:Subject) OPTIONAL MATCH (n)-[:HAS_AUTHOR]->(a:Author)"
+            conditions = []
             if category is not None:
-                query += f" WHERE s.subject = '{category}'"
+                conditions.append(f"s.subject = '{category}'")
             if author is not None:
-                query += (
-                    f" AND a.creator = '{author}'"
-                    if "WHERE" in query
-                    else f" WHERE a.creator = '{author}'"
-                )
+                conditions.append(f"a.name = '{author}'")
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
             query += " RETURN n.identifier AS identifier"
             if limit is not None:
                 query += f" LIMIT {limit}"
