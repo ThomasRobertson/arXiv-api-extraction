@@ -1,7 +1,7 @@
 import argparse
 from http.client import HTTPException
 import connect_to_arxiv
-import fill_data_base
+from db_connexion import GraphDBConnexion
 import requests_mock
 
 
@@ -37,7 +37,7 @@ def main(mock=False, neo4j_uri="neo4j://localhost:7687", resumption_token=None):
         resumption_token=resumption_token,
     )
 
-    db_connexion = fill_data_base.GraphDBConnexion("neo4j://localhost:7687")
+    db_connexion = GraphDBConnexion("neo4j://localhost:7687")
 
     for i, record in enumerate(harvester.next_record()):
         # if i == 1:
