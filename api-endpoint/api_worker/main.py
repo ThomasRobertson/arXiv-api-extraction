@@ -27,6 +27,14 @@ class HelloWorld(Resource):
         return {"hello": "world"}
 
 
+@api.route("/authors")
+class ListAuthors(Resource):
+    def get(self):
+        with app.config["neo4j_driver"].driver.session() as session:
+            result = session.run("MATCH (a:Author) RETURN a.name AS name")
+            return {"authors": [record["name"] for record in result]}
+
+
 @api.route("/records")
 class ListRecords(Resource):
     # Define the parser and add the 'limit', 'category', 'author', and 'date' arguments
