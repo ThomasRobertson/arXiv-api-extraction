@@ -8,6 +8,7 @@ class GraphDBConnexion:
 
     def __init__(self, uri: str) -> None:
         self.driver = GraphDatabase.driver(uri)
+        self.driver.verify_connectivity()
 
     def __del__(self) -> None:
         self.driver.close()
