@@ -2,16 +2,6 @@
 
 cd /app
 
-python -m venv .venv
-
-source .venv/bin/activate
-
-pip --version
-python --version
-
-# install requirements
-pip install -r requirements.txt
-
 export PYTHONPATH=$PWD
 
 # wait for Neo4j to be ready
@@ -35,8 +25,9 @@ args_api=""
 
 # Run the first Python script with arguments
 echo "## INFO : Launching harvester"
-python /app/harvest_and_collect/main.py $args_harvester
-
+if [ "$7" != "True" ]; then
+    python /app/harvest_and_collect/main.py $args_harvester
+fi
 # Once the first script finishes, run the second Python script with arguments
 echo "## INFO : Launching API worker"
 python /app/api_worker/main.py $args_api

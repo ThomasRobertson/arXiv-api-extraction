@@ -1,27 +1,26 @@
 version: '3'
 services:
   python-container:
-    image: python:3.12
+    build: .
     container_name: python-container
     volumes:
-      - ./api-endpoint/api_worker:/app/api_worker:ro
-      - ./harvest-and-collect/harvest_and_collect:/app/harvest_and_collect
-      - ./requirements.txt:/app/requirements.txt:ro
-      - ./init_app.sh:/app/init_app.sh:ro
-      - ./harvest-and-collect/mock-response:/app/mock-response:ro
+      - ../api-endpoint/api_worker:/app/api_worker:ro
+      - ../harvest-and-collect/harvest_and_collect:/app/harvest_and_collect
+      - ../harvest-and-collect/mock-response:/app/mock-response:ro
     depends_on:
       - neo4j
     ports:
       - "5000:5000"
     entrypoint:
       [
-        "./app/init_app.sh",
+        "/app/init_app.sh",
         "${MOCK}",
         "${NEO4J_URI}",
         "${RESUMPTION_TOKEN}",
         "${FROM_DATE}",
         "${UNTIL_DATE}",
-        "${SET_CAT}"
+        "${SET_CAT}",
+        "${SKIP_HARVEST}"
       ]
     networks:
       - docker-neo4j-prod
