@@ -29,11 +29,12 @@ class HelloWorld(Resource):
 
 @api.route("/records")
 class ListRecords(Resource):
-    # Define the parser and add the 'limit', 'category', and 'author' arguments
+    # Define the parser and add the 'limit', 'category', 'author', and 'date' arguments
     parser = reqparse.RequestParser()
     parser.add_argument("limit", type=int, help="Limit the number of records returned")
     parser.add_argument("category", type=str, help="Category of the records to return")
     parser.add_argument("author", type=str, help="Author of the records to return")
+    parser.add_argument("date", type=str, help="Date of the records to return")
 
     def get(self):
         # Parse the arguments
@@ -41,20 +42,28 @@ class ListRecords(Resource):
         limit = args.get("limit")
         category = args.get("category")
         author = args.get("author")
+        date = args.get("date")
 
         with app.config["neo4j_driver"].driver.session() as session:
-            query = "MATCH (n:Record) OPTIONAL MATCH (n)-[:HAS_SUBJECT]->(s:Subject) OPTIONAL MATCH (n)-[:HAS_AUTHOR]->(a:Author)"
-            conditions = []
+            query = "MATCH (n:Record)"
+            if date is not None:
+                query += " WHERE n.date = $date"
             if category is not None:
-                conditions.append(f"s.subject = '{category}'")
+                query += (
+                    " MATCH (n)-[:HAS_SUBJECT]->(s:Subject) WHERE s.subject = $category"
+                )
+            else:
+                query += " OPTIONAL MATCH (n)-[:HAS_SUBJECT]->(s:Subject)"
             if author is not None:
-                conditions.append(f"a.name = '{author}'")
-            if conditions:
-                query += " WHERE " + " AND ".join(conditions)
+                query += " MATCH (n)-[:HAS_AUTHOR]->(a:Author) WHERE a.name = $author"
+            else:
+                query += " OPTIONAL MATCH (n)-[:HAS_AUTHOR]->(a:Author)"
             query += " RETURN n.identifier AS identifier"
             if limit is not None:
                 query += f" LIMIT {limit}"
-            result = session.run(query)
+            result = session.run(
+                query, {"category": category, "author": author, "date": date}
+            )
             return {"records": [record["identifier"] for record in result]}
 
 
