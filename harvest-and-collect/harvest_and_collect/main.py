@@ -12,7 +12,14 @@ from harvest_and_collect.connect_to_arxiv import ArXivHarvester
 from harvest_and_collect.db_connexion import GraphDBConnexion
 
 
-def main(mock=False, neo4j_uri="neo4j://localhost:7687", resumption_token=None):
+def main(
+    mock=False,
+    neo4j_uri="neo4j://localhost:7687",
+    resumption_token=None,
+    from_date="2021-03-20",
+    until_date="2021-03-30",
+    set_cat="cs",
+):
     m = requests_mock.Mocker()
     if mock:
         m.start()
@@ -38,9 +45,9 @@ def main(mock=False, neo4j_uri="neo4j://localhost:7687", resumption_token=None):
         )
 
     harvester = ArXivHarvester(
-        from_date="2021-03-20",
-        until_date="2021-03-30",
-        set_cat="cs",
+        from_date=from_date,
+        until_date=until_date,
+        set_cat=set_cat,
         resumption_token=resumption_token,
     )
 
@@ -58,12 +65,18 @@ if __name__ == "__main__":
     parser.add_argument("--mock", action="store_true")
     parser.add_argument("--neo4j_uri", action="store_true")
     parser.add_argument("--resumption_token", action="store_true")
+    parser.add_argument("--from_date", type=str, required=True)
+    parser.add_argument("--until_date", type=str, required=True)
+    parser.add_argument("--set_cat", type=str, required=True)
     args = parser.parse_args()
     try:
         main(
             mock=args.mock,
             neo4j_uri=args.neo4j_uri,
             resumption_token=args.resumption_token,
+            from_date=args.from_date,
+            until_date=args.until_date,
+            set_cat=args.set_cat,
         )
     except ArXivHarvester.CustomHTTPException as e:
         error_message = f"ERROR: Request to ArVix timed out (Error {e.status_code})."
