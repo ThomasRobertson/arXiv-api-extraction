@@ -52,6 +52,10 @@ class ListRecords(Resource):
         author = args.get("author")
         date = args.get("date")
 
+        # Check that limit is non-negative
+        if limit is not None and limit < 0:
+            return {"error": "Limit must be a non-negative integer"}, 400
+
         with app.config["neo4j_driver"].driver.session() as session:
             query = "MATCH (n:Record)"
             if date is not None:
