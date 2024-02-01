@@ -45,20 +45,25 @@ class ListRecords(Resource):
         date = args.get("date")
 
         with app.config["neo4j_driver"].driver.session() as session:
-            query = "MATCH (n:Record) OPTIONAL MATCH (n)-[:HAS_SUBJECT]->(s:Subject) OPTIONAL MATCH (n)-[:HAS_AUTHOR]->(a:Author)"
-            conditions = []
-            if category is not None:
-                conditions.append(f"s.subject = '{category}'")
-            if author is not None:
-                conditions.append(f"a.name = '{author}'")
+            query = "MATCH (n:Record)"
             if date is not None:
-                conditions.append(f"n.date = '{date}'")
-            if conditions:
-                query += " WHERE " + " AND ".join(conditions)
+                query += " WHERE n.date = $date"
+            if category is not None:
+                query += (
+                    " MATCH (n)-[:HAS_SUBJECT]->(s:Subject) WHERE s.subject = $category"
+                )
+            else:
+                query += " OPTIONAL MATCH (n)-[:HAS_SUBJECT]->(s:Subject)"
+            if author is not None:
+                query += " MATCH (n)-[:HAS_AUTHOR]->(a:Author) WHERE a.name = $author"
+            else:
+                query += " OPTIONAL MATCH (n)-[:HAS_AUTHOR]->(a:Author)"
             query += " RETURN n.identifier AS identifier"
             if limit is not None:
                 query += f" LIMIT {limit}"
-            result = session.run(query)
+            result = session.run(
+                query, {"category": category, "author": author, "date": date}
+            )
             return {"records": [record["identifier"] for record in result]}
 
 
