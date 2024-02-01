@@ -63,11 +63,20 @@ def main(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--mock", action="store_true")
-    parser.add_argument("--neo4j_uri", action="store_true")
-    parser.add_argument("--resumption_token", action="store_true")
-    parser.add_argument("--from_date", type=str, required=True)
-    parser.add_argument("--until_date", type=str, required=True)
-    parser.add_argument("--set_cat", type=str, required=True)
+    parser.add_argument("--neo4j_uri", type=str)
+    parser.add_argument("--resumption_token", type=str)
+    parser.add_argument(
+        "--from_date",
+        type=str,
+    )
+    parser.add_argument(
+        "--until_date",
+        type=str,
+    )
+    parser.add_argument(
+        "--set_cat",
+        type=str,
+    )
     args = parser.parse_args()
     try:
         main(
