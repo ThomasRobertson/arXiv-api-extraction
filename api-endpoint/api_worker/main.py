@@ -4,11 +4,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import argparse
-from flask import Flask
-from flask_restx import Api, Resource, reqparse
+from flask import Flask, request
+from flask_restx import Api, Resource, reqparse, fields
 from harvest_and_collect.connect_to_arxiv import ArXivRecord
 from harvest_and_collect.fill_data_base import GraphDBConnexion
-from flask_restx import reqparse
+from xml.etree import ElementTree as ET
 
 
 def create_app() -> Flask:
@@ -73,6 +73,18 @@ class ListRecords(Resource):
                 query, {"category": category, "author": author, "date": date}
             )
             return {"records": [record["identifier"] for record in result]}
+
+    @api.expect(api.model("Record", {"xml": fields.String(required=True)}))
+    def post(self):
+        if request.json is not None:
+            xml_string = request.json.get("xml")
+            if xml_string is not None:
+                xml_element = ET.fromstring(xml_string)
+                record = ArXivRecord(xml_element)
+                if record.is_valid is True:
+                    app.config["neo4j_driver"].add_record(record)
+                    return {"message": "Record added successfully"}, 201
+        return {"message": "Invalid request"}, 400
 
 
 if __name__ == "__main__":
