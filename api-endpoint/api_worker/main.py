@@ -7,7 +7,7 @@ import argparse
 from flask import Flask, request
 from flask_restx import Api, Resource, reqparse, fields
 from harvest_and_collect.connect_to_arxiv import ArXivRecord
-from harvest_and_collect.fill_data_base import GraphDBConnexion
+from harvest_and_collect.db_connexion import GraphDBConnexion
 from xml.etree import ElementTree as ET
 
 
@@ -19,12 +19,6 @@ def create_app() -> Flask:
 
 app = create_app()
 api = Api(app)
-
-
-@api.route("/hello")
-class HelloWorld(Resource):
-    def get(self):
-        return {"hello": "world"}
 
 
 @api.route("/authors")
