@@ -1,8 +1,15 @@
+"""
+This module provides the main entry point for the ArXiv harvesting application.
+
+The main function in this module sets up a connection to the ArXiv database and the Neo4j
+database, then fetches records from the ArXiv database and adds them to the Neo4j database.
+It also handles command line arguments for running the application in mock mode, specifying
+the Neo4j URI, and specifying the resumption token for the ArXiv database.
+"""
 import argparse
-from http.client import HTTPException
-import connect_to_arxiv
-from db_connexion import GraphDBConnexion
 import requests_mock
+from harvest_and_collect.connect_to_arxiv import ArXivHarvester
+from harvest_and_collect.db_connexion import GraphDBConnexion
 
 
 def main(mock=False, neo4j_uri="neo4j://localhost:7687", resumption_token=None):
@@ -30,18 +37,16 @@ def main(mock=False, neo4j_uri="neo4j://localhost:7687", resumption_token=None):
             text=data3,
         )
 
-    harvester = connect_to_arxiv.ArXivHarvester(
+    harvester = ArXivHarvester(
         from_date="2021-03-20",
         until_date="2021-03-30",
         set_cat="cs",
         resumption_token=resumption_token,
     )
 
-    db_connexion = GraphDBConnexion("neo4j://localhost:7687")
+    db_connexion = GraphDBConnexion(neo4j_uri)
 
-    for i, record in enumerate(harvester.next_record()):
-        # if i == 1:
-        #     break
+    for record in harvester.next_record():
         db_connexion.add_record(record)
 
     if mock:
@@ -60,7 +65,7 @@ if __name__ == "__main__":
             neo4j_uri=args.neo4j_uri,
             resumption_token=args.resumption_token,
         )
-    except connect_to_arxiv.ArXivHarvester.CustomHTTPException as e:
+    except ArXivHarvester.CustomHTTPException as e:
         error_message = f"ERROR: Request to ArVix timed out (Error {e.status_code})."
         error_message += f' Last resumption token is "{e.resumption_token}"'
-        print(f"ERROR: Request to ArVix timed out.")
+        print("ERROR: Request to ArVix timed out.")

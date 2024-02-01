@@ -1,3 +1,17 @@
+"""
+This module provides classes to connect to and harvest records from the ArXiv database.
+
+Classes:
+    ArXivRecord: Represents a single record from the ArXiv database.
+    ArXivHarvester: Handles the connection to the ArXiv database and fetches records.
+
+The ArXivRecord class parses XML data from a single ArXiv record into a Python object.
+It extracts the header and metadata from the record and checks if the record is valid.
+
+The ArXivHarvester class connects to the ArXiv database and fetches records.
+It handles HTTP exceptions and retries failed requests.
+It also handles pagination by using the resumption token provided by the ArXiv API.
+"""
 from http.client import HTTPException
 from time import sleep
 from typing import Any, Generator
@@ -7,6 +21,8 @@ import requests
 
 
 class ArXivRecord:
+    """A class to represent a single record from the ArXiv database."""
+
     def __init__(self, record_xml: Element) -> None:
         self._namespaces = {
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
@@ -63,7 +79,14 @@ class ArXivRecord:
 
 
 class ArXivHarvester:
-    """Acces the ArXiv database"""
+    """A class to handle the connection to the ArXiv database and fetch records.
+
+    Raises:
+        ArXivHarvester.CustomHTTPException: Custom HTTP Exception that forward the status code and the resumption token, if any.
+
+    Yields:
+        next_record(): Yields the next record from the fetched records.
+    """
 
     class CustomHTTPException(HTTPException):
         """Custom HTTP Exception that forward the status code and the resumption token, if any."""
@@ -101,15 +124,19 @@ class ArXivHarvester:
             "dc": "http://purl.org/dc/elements/1.1/",
         }
         self._records = None
+        self.cursor = None
+        self.complete_list_size = None
+        self.record = None
 
     def _get_new_records(self) -> None:
-        # Exemple URL : https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc&from=2021-03-20&until=2021-03-23&set=cs
         response = requests.Response
         for i in range(5):
             if self._resumption_token is not None:
                 response = requests.get(
-                    f"https://export.arxiv.org/oai2?verb=ListRecords&resumptionToken={self._resumption_token}"
+                    f"https://export.arxiv.org/oai2?verb=ListRecords&resumptionToken={self._resumption_token}",
+                    timeout=5,
                 )
+
                 print(
                     f"INFO: Getting next request from ArXiv ({self._resumption_token})."
                 )
@@ -122,7 +149,7 @@ class ArXivHarvester:
                 if self._set_cat is not None:
                     base_url += f"&set={self._set_cat}"
                 print("INFO: Getting first request from ArXiv.")
-                response = requests.get(base_url)
+                response = requests.get(base_url, timeout=5)
             else:
                 print("INFO: Got all of the records from ArXiv.")
                 return
@@ -130,7 +157,7 @@ class ArXivHarvester:
             # print(response.status_code)
             if response.status_code == 200:
                 break
-            elif response.status_code == 503:
+            if response.status_code == 503:
                 print(f"WARN: Error 503 received. Sleep {i + 1} seconds.")
                 sleep(1 + i)  # incrementing the sleep time each time
 
@@ -162,9 +189,21 @@ class ArXivHarvester:
             self.cursor = None
             self.complete_list_size = None
         records = response.findall(".//oai:record", self._namespaces)
-        self._records = [record for record in records]
+        self._records = list(records)
 
     def next_record(self) -> Generator[ArXivRecord, Any, None]:
+        """
+        A generator method that yields the next record from the fetched records.
+
+        This method continuously yields records from the fetched records list. If the list is empty, it fetches a new batch
+        of records from the ArXiv database. If there are still no records after fetching, it stops the generator.
+
+        Yields:
+        ArXivRecord : The next record from the fetched records.
+
+        Raises:
+        CustomHTTPException : If an HTTP error occurs while fetching new records.
+        """
         while True:
             if self._records:  # If there are records left
                 self.record = self._records[0]

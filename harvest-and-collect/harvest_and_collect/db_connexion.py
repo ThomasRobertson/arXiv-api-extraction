@@ -14,8 +14,20 @@ class GraphDBConnexion:
         self.driver.close()
 
     def add_record(self, record: ArXivRecord) -> None:
+        """
+        Adds a record to the database.
+
+        This method checks if the record is valid. If it is, it opens a new session with the database and executes a write
+        transaction using the _record_tx method.
+
+        Args:
+            record (ArXivRecord):  The record to be added to the database.
+
+        Raises:
+            neo4j.exceptions.ServiceUnavailable:  If the database is not available.
+        """
         if record.header is None or record.metadata is None or record.is_valid is False:
-            print(f"ERROR: Record is not valid, canno't add it.")
+            print("ERROR: Record is not valid, canno't add it.")
             return
         with self.driver.session(database="neo4j") as session:
             session.execute_write(self._record_tx, record.header, record.metadata)
@@ -24,7 +36,7 @@ class GraphDBConnexion:
         self, tx, header: dict[str, str], metadata: dict[str, list[str]]
     ) -> None:
         # Create the Record node with properties from metadata
-        record = tx.run(
+        tx.run(
             """
             MERGE (r:Record {identifier: $identifier, title: $title, description: $description, date: $date, type: $type})
             RETURN r.identifier AS record
@@ -37,7 +49,7 @@ class GraphDBConnexion:
         )
 
         # Create the SetSpec node with setSpec from the header
-        setSpecNode = tx.run(
+        tx.run(
             """
             MERGE (s:SetSpec {setSpec: $setSpec})
             RETURN s.setSpec AS setSpec
@@ -48,7 +60,7 @@ class GraphDBConnexion:
         # Iterate over the creators in metadata and create an Author node for each
         for name in metadata["dc:creator"]:
             # Create the Author node with creator from metadata
-            authorNode = tx.run(
+            tx.run(
                 """
                 MERGE (a:Author {name: $name})
                 RETURN a.name AS name
@@ -57,7 +69,7 @@ class GraphDBConnexion:
             )
 
             # Create a relationship between the Record and Author nodes
-            recordAuthorRelationship = tx.run(
+            tx.run(
                 """
                 MATCH (r:Record {identifier: $identifier}), (a:Author {name: $name})
                 MERGE (r)-[rel:HAS_AUTHOR]->(a)
@@ -68,7 +80,7 @@ class GraphDBConnexion:
             )
 
         # Create a relationship between the Record and SetSpec nodes
-        recordSetSpecRelationship = tx.run(
+        tx.run(
             """
             MATCH (r:Record {identifier: $identifier}), (s:SetSpec {setSpec: $setSpec})
             MERGE (r)-[rel:HAS_SETSPEC]->(s)
@@ -81,7 +93,7 @@ class GraphDBConnexion:
         # Iterate over the subjects in metadata and create a Subject node for each
         for subject in metadata["dc:subject"]:
             # Create the Subject node with subject from metadata
-            subjectNode = tx.run(
+            tx.run(
                 """
                 MERGE (s:Subject {subject: $subject})
                 RETURN s.subject AS subject
@@ -90,7 +102,7 @@ class GraphDBConnexion:
             )
 
             # Create a relationship between the Record and Subject nodes
-            recordSubjectRelationship = tx.run(
+            tx.run(
                 """
                 MATCH (r:Record {identifier: $identifier}), (s:Subject {subject: $subject})
                 MERGE (r)-[rel:HAS_SUBJECT]->(s)
@@ -101,5 +113,8 @@ class GraphDBConnexion:
             )
 
     def clean_database(self) -> None:
+        """
+        Deletes all nodes and relationships from the database.
+        """
         with self.driver.session(database="neo4j") as session:
             session.run("MATCH (n) DETACH DELETE n")
