@@ -37,7 +37,7 @@ def db_connexion(app) -> GraphDBConnexion:
         )  # Clean the database before doing any test
         # Create some test data
         session.run(
-            "CREATE (s:Subject {subject: 'pytest_test'}), (a:Author {name: 'pytest_author'}), (r1:Record {identifier: 'pytest_test1'}), (r2:Record {identifier: 'pytest_test2'}), (r1)-[:HAS_SUBJECT]->(s), (r1)-[:HAS_AUTHOR]->(a), (r2)-[:HAS_SUBJECT]->(s), (r2)-[:HAS_AUTHOR]->(a)"
+            "CREATE (s:Subject {subject: 'pytest_test'}), (a:Author {name: 'pytest_author'}), (r1:Record {identifier: 'pytest_test1', date: '2022-01-01'}), (r2:Record {identifier: 'pytest_test2', date: '2022-02-01'}), (r1)-[:HAS_SUBJECT]->(s), (r1)-[:HAS_AUTHOR]->(a), (r2)-[:HAS_SUBJECT]->(s), (r2)-[:HAS_AUTHOR]->(a)"
         )
     yield db_connexion_return
 
