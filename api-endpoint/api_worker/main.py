@@ -7,7 +7,7 @@ import argparse
 from flask import Flask, request
 from flask_restx import Api, Resource, reqparse, fields
 from harvest_and_collect.connect_to_arxiv import ArXivRecord
-from harvest_and_collect.fill_data_base import GraphDBConnexion
+from harvest_and_collect.db_connexion import GraphDBConnexion
 from xml.etree import ElementTree as ET
 
 
@@ -21,18 +21,37 @@ app = create_app()
 api = Api(app)
 
 
-@api.route("/hello")
-class HelloWorld(Resource):
-    def get(self):
-        return {"hello": "world"}
-
-
 @api.route("/authors")
 class ListAuthors(Resource):
     def get(self):
         with app.config["neo4j_driver"].driver.session() as session:
             result = session.run("MATCH (a:Author) RETURN a.name AS name")
             return {"authors": [record["name"] for record in result]}
+
+
+@api.route("/article/<string:id>")
+class GetArticle(Resource):
+    def get(self, id):
+        with app.config["neo4j_driver"].driver.session() as session:
+            result = session.run(
+                """
+                MATCH (r:Record {identifier: $id})
+                OPTIONAL MATCH (r)-[:HAS_AUTHOR]->(a:Author)
+                OPTIONAL MATCH (r)-[:HAS_SUBJECT]->(s:Subject)
+                OPTIONAL MATCH (r)-[:HAS_SETSPEC]->(ss:SetSpec)
+                RETURN r, collect(DISTINCT a.name) as creators, collect(DISTINCT s.subject) as subjects, collect(DISTINCT ss.setSpec) as setspecs
+                """,
+                id=id,
+            )
+            record = result.single()
+            if record is None:
+                return {"error": "No record found with the given identifier"}, 404
+            # Convert the Neo4j Node object to a Python dictionary, otherwise we have a TypeError: not JSON serializable
+            record_dict = dict(record["r"])
+            record_dict["creators"] = record["creators"]
+            record_dict["subjects"] = record["subjects"]
+            record_dict["setspecs"] = record["setspecs"]
+            return {"record": record_dict}
 
 
 @api.route("/records")
