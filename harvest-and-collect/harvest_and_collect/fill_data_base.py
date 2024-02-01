@@ -98,3 +98,7 @@ class GraphDBConnexion:
                 identifier=header["identifier"],
                 subject=subject,
             )
+
+    def clean_database(self) -> None:
+        with self.driver.session(database="neo4j") as session:
+            session.run("MATCH (n) DETACH DELETE n")
