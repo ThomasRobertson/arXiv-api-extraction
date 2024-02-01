@@ -19,6 +19,7 @@ until [ "$(curl -o /dev/null -s -w "%{http_code}\n" http://$2:7474)" == "200" ];
     echo "Neo4j is unavailable - sleeping"
     sleep 1
 done
+echo "Neo4j is available !"
 
 # Prepare arguments for the Python scripts
 args_harvester=""
@@ -33,9 +34,11 @@ args_api=""
 [ "$2" != "False" ] && args_api+=" --neo4j_uri neo4j://$2:7687"
 
 # Run the first Python script with arguments
+echo "## INFO : Launching harvester"
 python /app/harvest_and_collect/main.py $args_harvester
 
 # Once the first script finishes, run the second Python script with arguments
-python /app/api_worker/main.py $args
+echo "## INFO : Launching API worker"
+python /app/api_worker/main.py $args_api
 
 exit $?
