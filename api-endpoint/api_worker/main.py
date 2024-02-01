@@ -29,11 +29,12 @@ class HelloWorld(Resource):
 
 @api.route("/records")
 class ListRecords(Resource):
-    # Define the parser and add the 'limit', 'category', and 'author' arguments
+    # Define the parser and add the 'limit', 'category', 'author', and 'date' arguments
     parser = reqparse.RequestParser()
     parser.add_argument("limit", type=int, help="Limit the number of records returned")
     parser.add_argument("category", type=str, help="Category of the records to return")
     parser.add_argument("author", type=str, help="Author of the records to return")
+    parser.add_argument("date", type=str, help="Date of the records to return")
 
     def get(self):
         # Parse the arguments
@@ -41,6 +42,7 @@ class ListRecords(Resource):
         limit = args.get("limit")
         category = args.get("category")
         author = args.get("author")
+        date = args.get("date")
 
         with app.config["neo4j_driver"].driver.session() as session:
             query = "MATCH (n:Record) OPTIONAL MATCH (n)-[:HAS_SUBJECT]->(s:Subject) OPTIONAL MATCH (n)-[:HAS_AUTHOR]->(a:Author)"
@@ -49,6 +51,8 @@ class ListRecords(Resource):
                 conditions.append(f"s.subject = '{category}'")
             if author is not None:
                 conditions.append(f"a.name = '{author}'")
+            if date is not None:
+                conditions.append(f"n.date = '{date}'")
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
             query += " RETURN n.identifier AS identifier"
