@@ -1,7 +1,7 @@
 import pytest
 import api_worker.main
 from flask import Flask
-from harvest_and_collect.fill_data_base import GraphDBConnexion
+from harvest_and_collect.db_connexion import GraphDBConnexion
 from harvest_and_collect.connect_to_arxiv import ArXivRecord
 from neo4j.exceptions import ServiceUnavailable
 from neo4j import Driver

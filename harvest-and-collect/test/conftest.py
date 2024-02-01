@@ -3,7 +3,7 @@
 from neo4j import GraphDatabase
 import pytest
 from harvest_and_collect.connect_to_arxiv import ArXivHarvester, ArXivRecord
-from harvest_and_collect.fill_data_base import GraphDBConnexion
+from harvest_and_collect.db_connexion import GraphDBConnexion
 
 # https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc&from=2021-03-20&until=2021-03-23&set=cs
 
