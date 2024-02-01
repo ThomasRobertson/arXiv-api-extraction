@@ -11,7 +11,8 @@ class GraphDBConnexion:
         self.driver.verify_connectivity()
 
     def __del__(self) -> None:
-        self.driver.close()
+        if hasattr(self, "driver"):
+            self.driver.close()
 
     def add_record(self, record: ArXivRecord) -> None:
         """
