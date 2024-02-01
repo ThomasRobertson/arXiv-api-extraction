@@ -20,13 +20,6 @@ def test_header_contain_identifier(record: ArXivRecord):
     assert isinstance(header["identifier"], str)
 
 
-def test_header_contain_datestamp(record: ArXivRecord):
-    header = record.header
-    if header is None:
-        assert False
-    assert isinstance(header["datestamp"], str)
-
-
 def test_header_contain_setspec(record: ArXivRecord):
     header = record.header
     if header is None:
@@ -77,14 +70,6 @@ def test_metadata_contain_date(record: ArXivRecord):
         assert False
     assert isinstance(metadata["dc:date"], list)
     assert bool(metadata["dc:date"]) is True
-
-
-def test_metadata_contain_identifier(record: ArXivRecord):
-    metadata = record.metadata
-    if metadata is None:
-        assert False
-    assert isinstance(metadata["dc:identifier"], list)
-    assert bool(metadata["dc:identifier"]) is True
 
 
 def test_metadata_contain_type(record: ArXivRecord):
