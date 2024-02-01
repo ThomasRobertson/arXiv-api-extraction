@@ -45,25 +45,25 @@ class GraphDBConnexion:
         )
 
         # Iterate over the creators in metadata and create an Author node for each
-        for creator in metadata["dc:creator"]:
+        for name in metadata["dc:creator"]:
             # Create the Author node with creator from metadata
             authorNode = tx.run(
                 """
-                MERGE (a:Author {creator: $creator})
-                RETURN a.creator AS creator
+                MERGE (a:Author {name: $name})
+                RETURN a.name AS name
                 """,
-                creator=creator,
+                name=name,
             )
 
             # Create a relationship between the Record and Author nodes
             recordAuthorRelationship = tx.run(
                 """
-                MATCH (r:Record {identifier: $identifier}), (a:Author {creator: $creator})
+                MATCH (r:Record {identifier: $identifier}), (a:Author {name: $name})
                 MERGE (r)-[rel:HAS_AUTHOR]->(a)
                 RETURN type(rel) AS relationshipType
                 """,
                 identifier=header["identifier"],
-                creator=creator,
+                name=name,
             )
 
         # Create a relationship between the Record and SetSpec nodes
