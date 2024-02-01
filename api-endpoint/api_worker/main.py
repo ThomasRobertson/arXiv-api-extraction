@@ -55,7 +55,7 @@ class ListRecords(Resource):
         with app.config["neo4j_driver"].driver.session() as session:
             query = "MATCH (n:Record)"
             if date is not None:
-                query += " WHERE n.date = $date"
+                query += " WHERE ANY(d IN n.date WHERE d = $date)"
             if category is not None:
                 query += (
                     " MATCH (n)-[:HAS_SUBJECT]->(s:Subject) WHERE s.subject = $category"
