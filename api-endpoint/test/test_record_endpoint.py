@@ -139,3 +139,20 @@ def test_get_article_with_invalid_id(client):
     response = client.get("/article/oai:FakeArXiv.org::invalid.invalid")
     assert response.status_code == 404
     assert response.json == {"error": "No record found with the given identifier"}
+
+
+def test_get_summary_with_valid_id(client):
+    response = client.get("/summary/oai:FakeArXiv.org:3456.7890")
+    assert response.status_code == 200
+    assert response.json == {
+        "description": [
+            " This is a fake description for debugging purposes. ",
+            " This is a comment. ",
+        ]
+    }
+
+
+def test_get_summary_with_invalid_id(client):
+    response = client.get("/summary/oai:FakeArXiv.org::invalid.invalid")
+    assert response.status_code == 404
+    assert response.json == {"error": "No record found with the given identifier"}
