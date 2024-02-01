@@ -4,6 +4,8 @@ from neo4j import GraphDatabase
 import pytest
 from harvest_and_collect.connect_to_arxiv import ArXivHarvester, ArXivRecord
 from harvest_and_collect.db_connexion import GraphDBConnexion
+from neo4j.exceptions import ServiceUnavailable
+from unittest.mock import Mock
 
 # https://export.arxiv.org/oai2?verb=ListRecords&metadataPrefix=oai_dc&from=2021-03-20&until=2021-03-23&set=cs
 
@@ -44,13 +46,29 @@ def record(harvester) -> ArXivRecord:
 
 
 @pytest.fixture(scope="session")
-def neo4j_driver():
-    driver = GraphDatabase.driver("neo4j://neo4j:7687")
-    yield driver
-    driver.close()
+def db_connexion():
+    try:  # try to access neo4://neo4j:7687, or default to localhost for local tests
+        db_connexion_return: GraphDBConnexion = GraphDBConnexion("neo4j://neo4j:7687")
+        db_connexion_return.driver.verify_connectivity()  # Call the method after instantiating the object
+    except (ServiceUnavailable, ValueError):
+        db_connexion_return = GraphDBConnexion("neo4j://localhost:7687")
+
+    db_connexion_return.clean_database()  # clean database before launching tests
+    return db_connexion_return
 
 
 @pytest.fixture(scope="session")
-def graph_db_connexion():
-    connexion = GraphDBConnexion
-    return connexion
+def mock_record() -> ArXivRecord:
+    record = Mock()
+    record.header = {"identifier": "oai:FakeArXiv.org:3456.7890", "setSpec": "cs"}
+    record.metadata = {
+        "dc:title": ["Fake Title"],
+        "dc:creator": ["Fake Author"],
+        "dc:description": [" This is a fake description for debugging purposes. "],
+        "dc:date": ["2022-01-04"],
+        "dc:type": ["text"],
+        "dc:subject": ["Computer and stuff"],
+    }
+    record.is_valid = True
+
+    return record

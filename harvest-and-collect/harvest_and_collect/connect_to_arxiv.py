@@ -28,7 +28,7 @@ class ArXivRecord:
 
     def _get_record_header(self) -> dict[str, str] | None:
         header = {}
-        header_fields = ["identifier", "datestamp", "setSpec"]
+        header_fields = ["identifier", "setSpec"]
         for field in header_fields:
             record_field = self._record_xml.find(
                 f".//oai:header/oai:{field}", self._namespaces
@@ -48,7 +48,7 @@ class ArXivRecord:
             "dc:description",
             "dc:date",
             "dc:type",
-            "dc:identifier",
+            # "dc:identifier",
         ]
         for field in metadata_fields:
             record_field = self._record_xml.findall(

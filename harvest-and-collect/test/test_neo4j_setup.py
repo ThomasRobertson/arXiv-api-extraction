@@ -1,33 +1,44 @@
 """Tests for the Neo4j database"""
 # pylint: disable=redefined-outer-name
-import pytest
-from neo4j import Driver
-from neo4j.exceptions import ServiceUnavailable
-
-# from src import fill_data_base
-# from src.connect_to_arxiv import ArXivHarvester
-import signal
 
 
-# class TimeoutException(Exception):
-#     pass
+def test_add_record(db_connexion, record):
+    db_connexion.add_record(record)
+
+    # Check that the record was added to the database
+    with db_connexion.driver.session(database="neo4j") as session:
+        result = session.run(
+            "MATCH (r:Record {identifier: $identifier}) RETURN r",
+            identifier=record.header["identifier"],
+        )
+        assert result.single() is not None
+    db_connexion.clean_database()
 
 
-# def timeout_handler(signum, frame):
-#     raise TimeoutException
+def test_add_invalid_record(db_connexion, record):
+    record.is_valid = False  # Invalidated record
+
+    db_connexion.add_record(record)
+
+    # Check that the record was not added to the database
+    with db_connexion.driver.session(database="neo4j") as session:
+        result = session.run(
+            "MATCH (r:Record {identifier: $identifier}) RETURN r",
+            identifier=record.header["identifier"],
+        )
+        assert result.single() is None
+    db_connexion.clean_database()
 
 
-# # set the signal handler
-# signal.signal(signal.SIGALRM, timeout_handler)
+def test_clean_database(db_connexion, record):
+    db_connexion.add_record(record)
 
+    # Clean the database
+    db_connexion.clean_database()
 
-# def test_neo4j_connectivity(neo4j_driver: Driver):
-#     try:
-#         signal.alarm(5)  # Set an alarm for 5 seconds
-#         neo4j_driver.verify_connectivity()
-#         signal.alarm(0)  # Reset the alarm
-#         assert True
-#     except TimeoutException:
-#         pytest.fail("Connection to Neo4j timed out.")
-#     except ServiceUnavailable as e:
-#         pytest.fail(f"{e}")
+    # Check that the databse is empty
+    with db_connexion.driver.session(database="neo4j") as session:
+        result = session.run("MATCH (r:Record) RETURN r")
+        assert result.peek() is None
+
+    db_connexion.clean_database()
