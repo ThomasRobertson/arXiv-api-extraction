@@ -15,7 +15,7 @@ pip install -r requirements.txt
 export PYTHONPATH=$PWD
 
 # wait for Neo4j to be ready
-until curl http://neo4j:7474; do
+until [ "$(curl -o /dev/null -s -w "%{http_code}\n" http://neo4j:7474)" == "200" ]; do
   echo "Neo4j is unavailable - sleeping"
   sleep 1
 done
