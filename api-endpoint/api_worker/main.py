@@ -24,19 +24,16 @@ from harvest_and_collect.connect_to_arxiv import ArXivRecord
 from harvest_and_collect.db_connexion import GraphDBConnexion
 
 
-def create_app() -> Flask:
-    """
-    Create a Flask application store.
+parser = argparse.ArgumentParser(
+    description="Launch the Flask app with a custom Neo4j URI."
+)
+# Add the '--neo4j_uri' argument
+parser.add_argument("--neo4j_uri")
+args = parser.parse_args()
 
-    Returns:
-        Flask: Flash app
-    """
-    new_app = Flask(__name__)
-    app.config["neo4j_driver"] = GraphDBConnexion("neo4j://localhost:7687")
-    return new_app
-
-
-app = create_app()
+app = Flask(__name__)
+print(args.neo4j_uri)
+app.config["neo4j_driver"] = GraphDBConnexion(args.neo4j_uri)
 api = Api(app)
 
 
@@ -183,10 +180,4 @@ class ListRecords(Resource):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Launch the Flask app with a custom Neo4j URI."
-    )
-    # Add the '--neo4j_uri' argument
-    parser.add_argument("--neo4j_uri", action="store_true")
-    args = parser.parse_args()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
