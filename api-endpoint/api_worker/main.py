@@ -1,20 +1,39 @@
-import sys
-from pathlib import Path
+"""
+This module provides a Flask application for interacting with a Neo4j database that stores
+ArXiv records.
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+The application provides several endpoints for querying the database:
+- /authors: Returns a list of all authors in the database.
+- /article/<id>: Returns the details of the article with the given identifier.
+- /summary/<id>: Returns the summary of the article with the given identifier.
+- /records: Returns a list of record identifiers. This endpoint accepts optional query
+parameters for filtering the records.
+
+The application also provides a POST endpoint at /records for adding a new record to the database.
+The record must be provided as an XML string in the request body.
+
+The application is configured to connect to a Neo4j database at the URI "neo4j://localhost:7687".
+This can be changed by modifying the 'neo4j_driver' configuration variable.
+"""
 
 import argparse
+from xml.etree import ElementTree as ET
 from flask import Flask, request
 from flask_restx import Api, Resource, reqparse, fields
 from harvest_and_collect.connect_to_arxiv import ArXivRecord
 from harvest_and_collect.db_connexion import GraphDBConnexion
-from xml.etree import ElementTree as ET
 
 
 def create_app() -> Flask:
-    app = Flask(__name__)
+    """
+    Create a Flask application store.
+
+    Returns:
+        Flask: Flash app
+    """
+    new_app = Flask(__name__)
     app.config["neo4j_driver"] = GraphDBConnexion("neo4j://localhost:7687")
-    return app
+    return new_app
 
 
 app = create_app()
@@ -23,6 +42,9 @@ api = Api(app)
 
 @api.route("/authors")
 class ListAuthors(Resource):
+    """List all of the authors present in the database."""
+
+    @api.doc(description="List all of the authors present in the database.")
     def get(self):
         with app.config["neo4j_driver"].driver.session() as session:
             result = session.run("MATCH (a:Author) RETURN a.name AS name")
@@ -30,7 +52,13 @@ class ListAuthors(Resource):
 
 
 @api.route("/article/<string:id>")
+@api.doc(
+    params={"id": "Identifier of the article, ex: oai:arXiv.org:0912.0228"},
+)
 class GetArticle(Resource):
+    """Get the details of an article."""
+
+    @api.doc(description="Get the details of an article.")
     def get(self, id):
         with app.config["neo4j_driver"].driver.session() as session:
             result = session.run(
@@ -55,7 +83,16 @@ class GetArticle(Resource):
 
 
 @api.route("/summary/<string:id>")
+@api.doc(params={"id": "Identifier of the article, ex: oai:arXiv.org:0912.0228"})
 class GetSummary(Resource):
+    """Get the summary (descriptions) of an article.
+
+    Note: there can be multiple description present in the article, such as other comments or notes.
+    """
+
+    @api.doc(
+        description="Fetches the summary of the article with the given identifier."
+    )
     def get(self, id):
         with app.config["neo4j_driver"].driver.session() as session:
             result = session.run(
@@ -70,6 +107,11 @@ class GetSummary(Resource):
 
 @api.route("/records")
 class ListRecords(Resource):
+    """
+    In GET, list all of the records present.
+    In POST, can add a new record in the XML format to the database.
+    """
+
     # Define the parser and add the 'limit', 'category', 'author', and 'date' arguments
     parser = reqparse.RequestParser()
     parser.add_argument("limit", type=int, help="Limit the number of records returned")
@@ -77,13 +119,17 @@ class ListRecords(Resource):
     parser.add_argument("author", type=str, help="Author of the records to return")
     parser.add_argument("date", type=str, help="Date of the records to return")
 
+    @api.expect(parser)
+    @api.doc(
+        description="Fetches a list of records from the database. The records can be filtered by limit, category, author, and date."
+    )
     def get(self):
         # Parse the arguments
-        args = self.parser.parse_args()
-        limit = args.get("limit")
-        category = args.get("category")
-        author = args.get("author")
-        date = args.get("date")
+        route_args = self.parser.parse_args()
+        limit = route_args.get("limit")
+        category = route_args.get("category")
+        author = route_args.get("author")
+        date = route_args.get("date")
 
         # Check that limit is non-negative
         if limit is not None and limit < 0:
@@ -111,7 +157,19 @@ class ListRecords(Resource):
             )
             return {"records": [record["identifier"] for record in result]}
 
-    @api.expect(api.model("Record", {"xml": fields.String(required=True)}))
+    record_model = api.model(
+        "Record",
+        {
+            "xml": fields.String(
+                required=True, description="The XML string of the record to be added"
+            )
+        },
+    )
+
+    @api.expect(record_model)
+    @api.doc(
+        description="Adds a new record to the database. The record must be provided as an XML string in the OAI-PHM type in the request body.",
+    )
     def post(self):
         if request.json is not None:
             xml_string = request.json.get("xml")
