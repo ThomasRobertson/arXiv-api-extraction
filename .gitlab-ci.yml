@@ -34,18 +34,33 @@ unit-test-api:
     - /bin/sh run_unit_test.sh
   coverage: /(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/
 
-lint-job:
+lint-job_harvester:
   stage: test
   image: python:3.12-bookworm
   allow_failure: true
   tags: [docker]
   before_script:
     - uname -a
-    - cd harvest-and-collect
     - python3 --version ; pip3 --version
     - pip3 install -r requirements.txt
+    - cd harvest-and-collect
+
   script:
-    - pylint harvest_and_collect test
+    - pylint harvest_and_collect
+
+lint-job-api:
+  stage: test
+  image: python:3.12-bookworm
+  allow_failure: true
+  tags: [docker]
+  before_script:
+    - uname -a
+    - python3 --version ; pip3 --version
+    - pip3 install -r requirements.txt
+    - cd api-endpoint
+
+  script:
+    - pylint api_worker
 
 
 release:
