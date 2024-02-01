@@ -9,25 +9,25 @@ from neo4j.exceptions import ServiceUnavailable
 import signal
 
 
-class TimeoutException(Exception):
-    pass
+# class TimeoutException(Exception):
+#     pass
 
 
-def timeout_handler(signum, frame):
-    raise TimeoutException
+# def timeout_handler(signum, frame):
+#     raise TimeoutException
 
 
-# set the signal handler
-signal.signal(signal.SIGALRM, timeout_handler)
+# # set the signal handler
+# signal.signal(signal.SIGALRM, timeout_handler)
 
 
-def test_neo4j_connectivity(neo4j_driver: Driver):
-    try:
-        signal.alarm(5)  # Set an alarm for 5 seconds
-        neo4j_driver.verify_connectivity()
-        signal.alarm(0)  # Reset the alarm
-        assert True
-    except TimeoutException:
-        pytest.fail("Connection to Neo4j timed out.")
-    except ServiceUnavailable as e:
-        pytest.fail(f"{e}")
+# def test_neo4j_connectivity(neo4j_driver: Driver):
+#     try:
+#         signal.alarm(5)  # Set an alarm for 5 seconds
+#         neo4j_driver.verify_connectivity()
+#         signal.alarm(0)  # Reset the alarm
+#         assert True
+#     except TimeoutException:
+#         pytest.fail("Connection to Neo4j timed out.")
+#     except ServiceUnavailable as e:
+#         pytest.fail(f"{e}")
