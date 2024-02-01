@@ -54,6 +54,20 @@ class GetArticle(Resource):
             return {"record": record_dict}
 
 
+@api.route("/summary/<string:id>")
+class GetSummary(Resource):
+    def get(self, id):
+        with app.config["neo4j_driver"].driver.session() as session:
+            result = session.run(
+                "MATCH (r:Record {identifier: $id}) RETURN r.description AS description",
+                id=id,
+            )
+            record = result.single()
+            if record is None:
+                return {"error": "No record found with the given identifier"}, 404
+            return {"description": record["description"]}
+
+
 @api.route("/records")
 class ListRecords(Resource):
     # Define the parser and add the 'limit', 'category', 'author', and 'date' arguments
