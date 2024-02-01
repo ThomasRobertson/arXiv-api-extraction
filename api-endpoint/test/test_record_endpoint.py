@@ -156,3 +156,10 @@ def test_get_summary_with_invalid_id(client):
     response = client.get("/summary/oai:FakeArXiv.org::invalid.invalid")
     assert response.status_code == 404
     assert response.json == {"error": "No record found with the given identifier"}
+
+
+def test_get_authors(client):
+    response = client.get("/authors")
+    assert response.status_code == 200
+    assert "Fake, Author A." in response.json["authors"]
+    assert "Fake, Author B." in response.json["authors"]
