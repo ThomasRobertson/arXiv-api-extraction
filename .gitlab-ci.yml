@@ -8,6 +8,7 @@ unit-test-harvester:
   tags: [shell]
   variables:
     GIT_STRATEGY: none
+  resource_group: test
   before_script:
     - uname -a
     - cd harvest-and-collect
@@ -24,6 +25,7 @@ unit-test-api:
   tags: [shell]
   variables:
     GIT_STRATEGY: none
+  resource_group: test
   before_script:
     - uname -a
     - cd api-endpoint
