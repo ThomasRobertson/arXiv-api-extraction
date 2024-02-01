@@ -51,6 +51,21 @@ sh run_unit_test.sh
 ```
 
 *Note: you will find one script of each module, they cannot be run in parrallel.*
+*Note: these tests relies on Docker to run. It create a neo4j database without volumes attached, so no data is keep after the tests are run*
+
+It is possible to run the test localy, using the command : 
+
+```bash
+docker run -d -p 7474:7474 -p 7687:7687 -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -e NEO4J_AUTH=none neo4j:5.15.0-community-bullseye
+```
+
+And then in each folder :
+```bash
+export PYTHONPATH=$PWD
+pytest test
+```
+
+The database can be keep running between each tests run as it is wipe before the start of each test.
 
 ## CI/CD
 
