@@ -115,6 +115,20 @@ def test_post_records(client):
     assert "oai:arXiv.org:1004.3608" in get_response.json["records"]
 
 
+def test_post_wrong_records(client):
+    xml_string = """
+    <record>
+    <header>
+    </header>
+    <metadata>
+    </metadata>
+    </record>
+    """
+    response = client.post("/records", json={"xml": xml_string})
+    assert response.status_code == 400
+    assert response.json == {"message": "Invalid request"}
+
+
 def test_get_article_with_valid_id(client):
     response = client.get("/article/oai:FakeArXiv.org:3456.7890")
     assert response.status_code == 200
