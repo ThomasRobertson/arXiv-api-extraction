@@ -31,7 +31,7 @@ class ArXivRecord:
         header_fields = ["identifier", "datestamp", "setSpec"]
         for field in header_fields:
             record_field = self._record_xml.find(
-                f"./oai:header/oai:{field}", self._namespaces
+                f".//oai:header/oai:{field}", self._namespaces
             )
             if record_field is not None:
                 header[field] = record_field.text
@@ -52,7 +52,7 @@ class ArXivRecord:
         ]
         for field in metadata_fields:
             record_field = self._record_xml.findall(
-                f"./oai:metadata/oai_dc:dc/{field}", self._namespaces
+                f".//oai:metadata/oai_dc:dc/{field}", self._namespaces
             )
             if record_field:
                 record_field = [item.text for item in record_field]
