@@ -113,3 +113,29 @@ def test_post_records(client):
     get_response = client.get("/records")
     assert get_response.status_code == 200
     assert "oai:arXiv.org:1004.3608" in get_response.json["records"]
+
+
+def test_get_article_with_valid_id(client):
+    response = client.get("/article/oai:FakeArXiv.org:3456.7890")
+    assert response.status_code == 200
+    assert response.json == {
+        "record": {
+            "date": ["2022-01-04", "2022-01-05"],
+            "identifier": "oai:FakeArXiv.org:3456.7890",
+            "description": [
+                " This is a fake description for debugging purposes. ",
+                " This is a comment. ",
+            ],
+            "title": ["Fake Title"],
+            "type": ["text"],
+            "creators": ["Fake, Author B."],
+            "subjects": ["Physic - Fake Subject"],
+            "setspecs": ["physic"],
+        }
+    }
+
+
+def test_get_article_with_invalid_id(client):
+    response = client.get("/article/oai:FakeArXiv.org::invalid.invalid")
+    assert response.status_code == 404
+    assert response.json == {"error": "No record found with the given identifier"}
