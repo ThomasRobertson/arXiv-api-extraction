@@ -115,6 +115,46 @@ def test_post_records(client):
     assert "oai:arXiv.org:1004.3608" in get_response.json["records"]
 
 
+def test_post_minimal_records(client):
+    get_response = client.get("/records")
+    assert get_response.status_code == 200
+    assert "oai:arXiv.org:1004.3609" not in get_response.json["records"]
+
+    xml_string = """
+    <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+    <record>
+    <header>
+     <identifier>oai:arXiv.org:1004.3609</identifier>
+     <setSpec>cs</setSpec>
+    </header>
+    <metadata>
+     <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+     <dc:title>Mock Title1</dc:title>
+     <dc:creator>Mock Creator</dc:creator>
+     <dc:subject>Mock Subject1</dc:subject>
+     <dc:subject>Mock Subject2</dc:subject>
+     <dc:subject>Mock Subject3</dc:subject>
+     <dc:subject>Mock Subject4</dc:subject>
+     <dc:subject>Mock Subject5</dc:subject>
+     <dc:description>Mock Description1</dc:description>
+     <dc:description>Mock Description2</dc:description>
+     <dc:date>2021-03-23</dc:date>
+     <dc:date>2021-03-24</dc:date>
+     <dc:type>text</dc:type>
+     </oai_dc:dc>
+    </metadata>
+    </record>
+    </OAI-PMH>
+    """
+    response = client.post("/records", json={"xml": xml_string})
+    assert response.status_code == 201
+    assert response.json == {"message": "Record added successfully"}
+
+    get_response = client.get("/records")
+    assert get_response.status_code == 200
+    assert "oai:arXiv.org:1004.3609" in get_response.json["records"]
+
+
 def test_post_wrong_records(client):
     xml_string = """
     <record>
